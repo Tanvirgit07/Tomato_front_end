@@ -1,10 +1,10 @@
 import React from 'react'
-import BlogSection from './_components/BlogSection'
+import AboutPage from './_components/AboutPage'
 
 function page() {
   return (
     <div>
-        <BlogSection />
+        <AboutPage />
     </div>
   )
 }

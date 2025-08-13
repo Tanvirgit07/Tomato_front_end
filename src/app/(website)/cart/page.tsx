@@ -1,10 +1,10 @@
 import React from 'react'
-import BlogSection from './_components/BlogSection'
+import CartPage from './components/CartPage'
 
 function page() {
   return (
     <div>
-        <BlogSection />
+        <CartPage />
     </div>
   )
 }

@@ -1,10 +1,10 @@
 import React from 'react'
-import BlogSection from './_components/BlogSection'
+import CheckoutPage from './_components/CheckoutPage'
 
 function page() {
   return (
     <div>
-        <BlogSection />
+        <CheckoutPage />
     </div>
   )
 }

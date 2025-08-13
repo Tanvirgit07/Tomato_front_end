@@ -8,6 +8,7 @@ import CustomarReview from './_components/CustomarReview'
 import BrandSection from './_components/BrandSection'
 import BlogSection from './_components/BlogSection'
 import CTASection from './_components/CTASection'
+import ContactUs from './_components/ContactUs'
 
 function page() {
   return (
@@ -19,6 +20,7 @@ function page() {
         <OfferCard />
         <CustomarReview />
         <BrandSection />
+        <ContactUs />
         <CTASection />
         <BlogSection />
         

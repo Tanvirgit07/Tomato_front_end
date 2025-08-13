@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Search, ShoppingBasket, Menu, X, User, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import Link from "next/link";
+import { Search, ShoppingBasket, Menu, X, User, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,13 +43,18 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10 font-semibold tracking-wide">
-            {['Home', 'Menu', 'About Us', 'Contact Us', 'Blog & Expert Tips'].map((item) => (
+            {[
+              { label: "Home", href: "/" },
+              { label: "Products", href: "/products" },
+              { label: "About Us", href: "/about-us" },
+              { label: "Blog & Expert Tips", href: "/blog" },
+            ].map((item) => (
               <Link
-                key={item}
-                href={`/${item.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`}
-                className="relative text-gray-700 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 transition-colors duration-300 px-3 py-2 rounded-lg hover:bg-red-50 text-base"
+                key={item.label}
+                href={item.href}
+                className="relative text-gray-700 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 transition-colors duration-300 px-3 py-2 rounded-lg hover:bg-red-50 text-base group"
               >
-                {item}
+                {item.label}
                 <span
                   aria-hidden="true"
                   className="absolute left-0 bottom-0 h-0.5 w-full bg-red-600 scale-x-0 origin-center transition-transform duration-300 ease-in-out group-hover:scale-x-100"
@@ -113,7 +118,10 @@ const Navbar = () => {
                   <span className="sr-only">Account</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2">
+              <DropdownMenuContent
+                align="end"
+                className="w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2"
+              >
                 <DropdownMenuItem asChild>
                   <Link
                     href="/login"
@@ -179,7 +187,10 @@ const Navbar = () => {
                   <span className="sr-only">Account</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2">
+              <DropdownMenuContent
+                align="end"
+                className="w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2"
+              >
                 <DropdownMenuItem asChild>
                   <Link
                     href="/login"
@@ -205,7 +216,11 @@ const Navbar = () => {
               onClick={toggleMenu}
               className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300"
             >
-              {isMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+              {isMenuOpen ? (
+                <X className="w-7 h-7" />
+              ) : (
+                <Menu className="w-7 h-7" />
+              )}
             </Button>
           </div>
         </div>
@@ -227,10 +242,19 @@ const Navbar = () => {
               </div>
 
               {/* Mobile Navigation Links */}
-              {['Home', 'Menu', 'About Us', 'Contact Us', 'Blog & Expert Tips'].map((item) => (
+              {[
+                "Home",
+                "Menu",
+                "About Us",
+                "Contact Us",
+                "Blog & Expert Tips",
+              ].map((item) => (
                 <Link
                   key={item}
-                  href={`/${item.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-')}`}
+                  href={`/${item
+                    .toLowerCase()
+                    .replace(/ & /g, "-")
+                    .replace(/\s+/g, "-")}`}
                   className="block px-3 py-2 text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
