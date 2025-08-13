@@ -118,67 +118,68 @@ const Category = () => {
         </div>
 
         {/* Categories Carousel */}
-        <div className="relative">
-          <Carousel
-            opts={{
-              align: 'start',
-              loop: true,
-            }}
-            className="w-full"
+        {/* Categories Carousel */}
+<div className="relative">
+  <Carousel
+    opts={{
+      align: 'start',
+      loop: true,
+    }}
+    className="w-full"
+  >
+    <CarouselContent className="-ml-2 sm:-ml-3"> {/* gap reduced */}
+      {categories.map((category) => (
+        <CarouselItem
+          key={category.id}
+          className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7"
+        >
+          <div
+            onClick={() => handleCategoryClick(category.name)}
+            className={`flex flex-col items-center cursor-pointer group transition-transform duration-300 p-2 sm:p-3 rounded-xl ${
+              activeCategory === category.name
+                ? 'scale-105'
+                : 'hover:scale-105'
+            }`}
           >
-            <CarouselContent className="-ml-3 sm:-ml-4">
-              {categories.map((category) => (
-                <CarouselItem
-                  key={category.id}
-                  className="pl-3 sm:pl-4 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7"
-                >
-                  <div
-                    onClick={() => handleCategoryClick(category.name)}
-                    className={`flex flex-col items-center cursor-pointer group transition-all duration-300 p-3 rounded-xl ${
-                      activeCategory === category.name
-                        ? ' transform scale-105'
-                        : ' hover:transform hover:scale-105'
-                    }`}
-                  >
-                    {/* Image Container */}
-                    <div
-                      className={`relative w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 mb-4 rounded-full overflow-hidden transition-all duration-300 ${
-                        activeCategory === category.name
-                          ? 'ring-4 ring-orange-400 shadow-xl'
-                          : 'group-hover:shadow-xl group-hover:ring-2 group-hover:ring-orange-200'
-                      }`}
-                    >
-                      <img
-                        src={category.image}
-                        alt={category.alt}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    </div>
+            {/* Image Container */}
+            <div
+              className={`relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 ${
+                activeCategory === category.name
+                  ? 'ring-4 ring-orange-400 shadow-lg'
+                  : 'group-hover:shadow-md group-hover:ring-2 group-hover:ring-orange-200'
+              }`}
+            >
+              <img
+                src={category.image}
+                alt={category.alt}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              />
+            </div>
 
-                    {/* Category Name */}
-                    <h3
-                      className={`text-sm sm:text-base lg:text-lg font-semibold text-center transition-colors duration-300 ${
-                        activeCategory === category.name
-                          ? 'text-orange-600'
-                          : 'text-gray-800 group-hover:text-orange-600'
-                      }`}
-                    >
-                      {category.name}
-                    </h3>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
+            {/* Category Name */}
+            <h3
+              className={`text-xs sm:text-sm lg:text-base font-semibold text-center transition-colors duration-300 ${
+                activeCategory === category.name
+                  ? 'text-orange-600'
+                  : 'text-gray-800 group-hover:text-orange-600'
+              }`}
+            >
+              {category.name}
+            </h3>
+          </div>
+        </CarouselItem>
+      ))}
+    </CarouselContent>
 
-            {/* Navigation Buttons */}
-            <CarouselPrevious
-              className="absolute -left-2 lg:-left-6 sm:-left-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-600 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
-            />
-            <CarouselNext
-              className="absolute -right-2 lg:-right-6 sm:-right-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-600 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
-            />
-          </Carousel>
-        </div>
+    {/* Navigation Buttons */}
+    <CarouselPrevious
+      className="absolute -left-2 lg:-left-5 sm:-left-6 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+    />
+    <CarouselNext
+      className="absolute -right-2 lg:-right-5 sm:-right-6 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2"
+    />
+  </Carousel>
+</div>
 
         {/* Selected Category Products */}
         <div className="mt-10 sm:mt-12 lg:mt-16">

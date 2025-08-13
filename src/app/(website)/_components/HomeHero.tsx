@@ -67,7 +67,7 @@ const HomeHero = () => {
               <div>
                 <Link 
                   href="/menu" 
-                  className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
+                  className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
                 >
                   View Menu
                 </Link>

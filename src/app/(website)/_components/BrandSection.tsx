@@ -340,7 +340,7 @@ const BrandCard: React.FC<BrandCardProps> = ({ brand, index }) => (
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="container mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-4">
@@ -481,7 +481,7 @@ const BrandCard: React.FC<BrandCardProps> = ({ brand, index }) => (
         )}
 
         {/* Stats Section */}
-        <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white">
+        <div className="mt-16 bg-gradient-to-r from-orange-400 to-red-400 rounded-3xl p-8 text-white">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-3xl sm:text-4xl font-bold mb-2">{brandsData.length}+</div>
@@ -505,35 +505,7 @@ const BrandCard: React.FC<BrandCardProps> = ({ brand, index }) => (
             </div>
           </div>
         </div>
-
-        {/* Call to Action */}
-        <div className="text-center mt-12">
-          <Button 
-            size="lg" 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            Explore All Brands
-          </Button>
-        </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out forwards;
-          opacity: 0;
-        }
-      `}</style>
     </div>
   );
 };

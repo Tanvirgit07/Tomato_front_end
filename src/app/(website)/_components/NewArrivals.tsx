@@ -1,13 +1,6 @@
 "use client";
 import { Star } from "lucide-react";
 import { useState, useEffect } from "react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 
 const products = [
   {
@@ -26,7 +19,7 @@ const products = [
     name: "Glow Essence Oil",
     category: "Skin Care",
     description: "A nourishing oil with natural ingredients.",
-    image: "https://images.unsplash.com/photo-1596495578066-dac883e1a52f?w=300&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
     originalPrice: 60.00,
     discountedPrice: 35.00,
     discountPercentage: 30,
@@ -37,7 +30,7 @@ const products = [
     name: "Radiance Drop Serum",
     category: "Skin Care",
     description: "An advanced serum for radiant skin.",
-    image: "https://images.unsplash.com/photo-1611637057911-02af7e2b6e8e?w=300&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
     originalPrice: 73.00,
     discountedPrice: 40.00,
     discountPercentage: 40,
@@ -48,22 +41,11 @@ const products = [
     name: "Velvet Moisturizer",
     category: "Make Up",
     description: "A silky moisturizer for flawless makeup base.",
-    image: "https://images.unsplash.com/photo-1600585154526-990d71c4a932?w=300&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
     originalPrice: 45.00,
     discountedPrice: 22.50,
     discountPercentage: 50,
     rating: 4.8,
-  },
-  {
-    id: 5,
-    name: "Aroma Bliss Perfume",
-    category: "Fragrances",
-    description: "A long-lasting floral fragrance.",
-    image: "https://images.unsplash.com/photo-1600585154764-47e20ea6f7b6?w=300&h=300&fit=crop",
-    originalPrice: 80.00,
-    discountedPrice: 40.00,
-    discountPercentage: 50,
-    rating: 4.9,
   },
 ];
 
@@ -107,70 +89,138 @@ const BestSellingProduct = () => {
     const emptyStars = 5 - Math.ceil(rating);
 
     return (
-      <div className="flex items-center text-yellow-400">
+      <div className="flex items-center gap-0.5">
         {Array(fullStars)
           .fill(0)
           .map((_, i) => (
-            <Star key={i} fill="currentColor" />
+            <Star key={i} size={14} fill="#F59E0B" className="text-amber-500" />
           ))}
-        {halfStar && <Star key="half" fill="currentColor" className="text-yellow-400 opacity-50" />}
+        {halfStar && <Star key="half" size={14} fill="#F59E0B" className="text-amber-500 opacity-50" />}
         {Array(emptyStars)
           .fill(0)
           .map((_, i) => (
-            <Star key={`empty-${i}`} className="text-gray-300" />
+            <Star key={`empty-${i}`} size={14} className="text-slate-300" />
           ))}
       </div>
     );
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div className="text-gray-500 text-sm mb-2">Our Products</div>
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Our New Arrival Products</h2>
-      <Carousel className="w-full">
-        <CarouselContent>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 rounded-full mb-4">
+            <span className="text-indigo-600 font-medium text-sm">Our Products</span>
+          </div>
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
+            New Arrival Collection
+          </h2>
+          <p className="text-slate-600 max-w-2xl mx-auto">
+            Discover our latest premium products crafted with the finest ingredients for your beauty needs
+          </p>
+        </div>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {products.map((product) => (
-            <CarouselItem
+            <div 
               key={product.id}
-              className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-slate-100"
             >
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative group">
-                <div className="relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-64 object-cover"
-                  />
-                  <div className="absolute top-4 left-4 bg-green-700 text-white px-2 py-1 rounded-full text-sm">
-                    {product.discountPercentage}% off
-                  </div>
-                  <div className="absolute bottom-4 left-4 bg-green-700 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                    <span>{timeLeft.days}</span>:<span>{timeLeft.hours}</span>:<span>{timeLeft.minutes}</span>:<span>{timeLeft.seconds}</span>
+              {/* Image Container */}
+              <div className="relative overflow-hidden">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                
+                {/* Discount Badge */}
+                <div className="absolute top-4 left-4">
+                  <div className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-3 py-1.5 rounded-2xl text-sm font-semibold shadow-lg">
+                    {product.discountPercentage}% OFF
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">{product.name}</h3>
-                  <div className="flex items-center mt-2">{renderStars(product.rating)}</div>
-                  <p className="text-gray-600 text-sm mt-2 line-clamp-2">{product.description}</p>
-                  <div className="flex items-center justify-between mt-3">
-                    <div>
-                      <span className="text-orange-600 font-bold text-lg">${product.discountedPrice.toFixed(2)}</span>
-                      <span className="text-gray-400 line-through ml-2">${product.originalPrice.toFixed(2)}</span>
+
+                {/* Timer Badge */}
+                <div className="absolute bottom-4 right-4">
+                  <div className="bg-black/80 backdrop-blur-sm text-white px-3 py-2 rounded-2xl text-xs font-mono">
+                    <div className="flex items-center gap-1">
+                      <span className="font-bold">{String(timeLeft.days).padStart(2, '0')}</span>
+                      <span className="opacity-60">:</span>
+                      <span className="font-bold">{String(timeLeft.hours).padStart(2, '0')}</span>
+                      <span className="opacity-60">:</span>
+                      <span className="font-bold">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="opacity-60">:</span>
+                      <span className="font-bold">{String(timeLeft.seconds).padStart(2, '0')}</span>
                     </div>
-                    <span className="text-yellow-400">5.0</span>
+                  </div>
+                </div>
+
+                {/* Category Badge */}
+                <div className="absolute top-4 right-4">
+                  <div className="bg-white/90 backdrop-blur-sm text-slate-700 px-3 py-1 rounded-full text-xs font-medium">
+                    {product.category}
                   </div>
                 </div>
               </div>
-            </CarouselItem>
+
+              {/* Content */}
+              <div className="p-6 space-y-4">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                    {product.name}
+                  </h3>
+                  <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
+                    {product.description}
+                  </p>
+                </div>
+
+                {/* Rating */}
+                <div className="flex items-center gap-3">
+                  {renderStars(product.rating)}
+                  <span className="text-amber-600 font-semibold text-sm">
+                    {product.rating}
+                  </span>
+                </div>
+
+                {/* Price Section */}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        ${product.discountedPrice.toFixed(2)}
+                      </span>
+                      <span className="text-slate-400 line-through text-sm">
+                        ${product.originalPrice.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="text-green-600 text-xs font-medium">
+                      Save ${(product.originalPrice - product.discountedPrice).toFixed(2)}
+                    </div>
+                  </div>
+                  
+                  {/* Add to Cart Button */}
+                  <button className="bg-gradient-to-r from-orange-500 to-red-400 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            </div>
           ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-      <div className="mt-6 text-right">
-        <button className="bg-green-700 text-white px-6 py-2 rounded-full hover:bg-green-800">
-          View All Products
-        </button>
+        </div>
+
+        {/* View All Button */}
+        <div className="text-center mt-16">
+          <button className="bg-gradient-to-r from-orange-500 to-red-400 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl">
+            View All Products
+            <span className="ml-2">→</span>
+          </button>
+        </div>
       </div>
     </div>
   );
