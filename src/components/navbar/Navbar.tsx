@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,18 +24,20 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white shadow-xl sticky top-0 z-50 border-b border-gray-100">
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center gap-2 group">
-              <svg
-                className="w-9 h-9 text-red-600 group-hover:text-red-700 transition-colors duration-300"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4-8h-3v3c0 .55-.45 1-1 1s-1-.45-1-1v-3H8c-.55 0-1-.45-1-1s.45-1 1-1h3V7c0-.55.45-1 1-1s1 .45 1 1v3h3c.55 0 1 .45 1 1s-.45 1-1 1z" />
-              </svg>
+              <div className="h-[50px] w-[50px] flex items-center justify-center">
+                <Image
+                  src="/images/source.gif"
+                  width={200}
+                  height={200}
+                  className="object-cover"
+                  alt="logo image"
+                />
+              </div>
               <h1 className="text-2xl md:text-3xl font-extrabold text-red-600 group-hover:text-red-700 transition-colors duration-300 tracking-tight">
                 Tomato.
               </h1>

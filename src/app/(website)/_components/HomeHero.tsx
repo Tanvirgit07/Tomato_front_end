@@ -5,17 +5,17 @@ import Link from 'next/link';
 
 const slides = [
   {
-    image: '/images/header_img.png',
+    image: '/images/food1.jpg',
     title: 'Delicious Pizza',
     description: 'Freshly baked with premium ingredients. Perfect for any occasion.',
   },
   {
-    image: '/images/header_img.png',
+    image: '/images/food2.jpg',
     title: 'Juicy Burgers',
     description: 'Made with 100% beef, fresh veggies, and special sauce.',
   },
   {
-    image: '/images/header_img.png',
+    image: '/images/food3.jpg',
     title: 'Healthy Salads',
     description: 'Fresh, nutritious, and bursting with flavor.',
   },

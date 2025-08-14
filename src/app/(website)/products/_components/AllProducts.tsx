@@ -161,7 +161,7 @@ export default function AllProducts() {
               <div>
                 <Label htmlFor="company" className="text-slate-800 font-semibold">Company</Label>
                 <Select>
-                  <SelectTrigger id="company" className="mt-2 rounded-2xl border-slate-200">
+                  <SelectTrigger id="company" className="mt-2 rounded-2xl w-full border-slate-200">
                     <SelectValue placeholder="Select a company" />
                   </SelectTrigger>
                   <SelectContent>
@@ -206,15 +206,15 @@ export default function AllProducts() {
                   </div>
 
                   {/* Content */}
-                  <CardContent className="p-6 space-y-4">
+                  <CardContent className="p-62space-y-2">
                     <div>
                       <h3 className="text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
                         {product.name}
                       </h3>
-                      <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
+                      {/* <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
                         {product.description}
                       </p>
-                      <p className="text-slate-500 text-xs mt-1">by {product.company}</p>
+                      <p className="text-slate-500 text-xs mt-1">by {product.company}</p> */}
                     </div>
 
                     {/* Rating */}

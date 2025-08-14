@@ -1,111 +1,152 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import image from "@/../../public/images/signupImage.jpg"
+interface FormData {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
 
-const formSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-});
-
-export function LoginForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+const LoginForm = () => {
+  const [formData, setFormData] = useState<FormData>({
+    email: "",
+    password: "",
+    rememberMe: false,
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log("Sign In Data:", formData);
+  };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-10 max-w-6xl mx-auto min-h-screen flex flex-col justify-center px-6 py-8"
-      >
-        <div className="flex flex-col md:flex-row items-center gap-12">
-          {/* Left side: Image */}
-          <div className="w-full md:w-1/2 rounded-xl overflow-hidden shadow-lg">
-            <Image
-              src="/images/signUp.jpg"
-              alt="signup image"
-              width={500}
-              height={500}
-              className="object-cover w-full h-full"
-              priority
-            />
-          </div>
-
-          {/* Right side: Form */}
-          <div className="w-full md:w-1/2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-            <div className="grid grid-cols-1 gap-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg font-semibold">
-                      Email
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="you@example.com"
-                        type="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-sm text-red-600 mt-1" />
-                  </FormItem>
-                )}
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left side - Image */}
+      <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
+              <Image
+                src="/images/signupImage.jpg"
+                alt="Sign Up Illustration"
+                fill
+                className="object-cover"
               />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-lg font-semibold">
-                      Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="******" type="password" {...field} />
-                    </FormControl>
-                    <FormMessage className="text-sm text-red-600 mt-1" />
-                  </FormItem>
-                )}
-              />
+              <div className="absolute inset-0 bg-black/30" />
+              <div className="absolute top-8 left-8 z-10">
+                <div className="flex items-center space-x-2">
+                  <div className="h-[70px] w-[70px] flex items-center justify-center">
+                    <Image
+                      src="/images/source.gif"
+                      width={200}
+                      height={200}
+                      className="object-cover"
+                      alt="logo image"
+                    />
+                  </div>
+                  <span className="text-2xl font-bold text-white">
+                    T<span className="text-red-400">O</span>MAT<span className="text-red-400">O</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <Button
-              type="submit"
-              className="mt-8 w-full py-3 text-lg font-semibold"
-            >
-              Login
-            </Button>
-          </div>
-          <p></p>
+      {/* Right side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-start p-6 bg-gray-50">
+        <div className="w-full max-w-2xl">
+          <CardHeader className="text-start">
+            <CardTitle className="lg:text-[40px] md:text-[30px] text-[24px] font-semibold leading-[120%] text-[#000000]">
+              Welcome 👋
+            </CardTitle>
+            <p className="text-[#B0B0B0] text-base leading-[120%] font-normal mb-8">
+              Please enter your details
+            </p>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="email" className="text-base font-medium">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="h-[51px] border border-[#272727] mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password" className="text-base font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                  className="h-[51px] border border-[#272727] mt-2"
+                />
+              </div>
+
+              <div className="flex items-center justify-between mt-2 pb-7">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberMe"
+                    checked={formData.rememberMe}
+                    className="w-5 h-5 rounded-sm border-gray-300 text-red-600 focus:ring-red-500"
+                    onCheckedChange={(checked) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        rememberMe: checked === true,
+                      }))
+                    }
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm text-gray-700">
+                    Remember Me
+                  </Label>
+                </div>
+
+                <button
+                  type="button"
+                  className="text-sm text-red-500 hover:text-red-700 transition"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full text-base h-[51px] bg-[#EF1A26] hover:bg-[#ee5e65] text-white py-2 rounded-md transition"
+              >
+                Login
+              </Button>
+            </form>
+          </CardContent>
         </div>
-      </form>
-    </Form>
+      </div>
+    </div>
   );
-}
+};
+
+export default LoginForm;
