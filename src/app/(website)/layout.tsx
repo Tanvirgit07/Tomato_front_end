@@ -1,6 +1,6 @@
 import React from 'react'
 
-function logout({children}: {children: React.ReactNode}) {
+function layout({children}: {children: React.ReactNode}) {
   return (
     <div>
         {children}
@@ -8,4 +8,4 @@ function logout({children}: {children: React.ReactNode}) {
   )
 }
 
-export default logout
+export default layout
