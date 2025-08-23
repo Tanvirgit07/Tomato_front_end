@@ -11,7 +11,7 @@ import {
 import ProductHome from "./ProductHome";
 import { useQuery } from "@tanstack/react-query";
 import { categoyMap } from "../../../../types";
-
+import Image from "next/image";
 
 const Category = () => {
   const [activeCategory, setActiveCategory] = useState("Salad");
@@ -80,7 +80,7 @@ const Category = () => {
             <CarouselContent className="-ml-2 sm:-ml-3">
               {" "}
               {/* gap reduced */}
-              {categories.map((category : categoyMap) => (
+              {categories.map((category: categoyMap) => (
                 <CarouselItem
                   key={category._id}
                   className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7"
@@ -101,7 +101,9 @@ const Category = () => {
                           : "group-hover:shadow-md group-hover:ring-2 group-hover:ring-orange-200"
                       }`}
                     >
-                      <img
+                      <Image
+                        width={200}
+                        height={200}
                         src={category.image}
                         alt={category.categoryName}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"

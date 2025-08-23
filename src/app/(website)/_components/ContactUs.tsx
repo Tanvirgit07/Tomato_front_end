@@ -100,7 +100,7 @@ export default function ContactForm() {
         <Card>
           <CardHeader>
             <CardTitle>Send Us a Message</CardTitle>
-            <CardDescription>We'll get back to you as soon as possible.</CardDescription>
+            <CardDescription>We&apos;ll get back to you as soon as possible.</CardDescription>
           </CardHeader>
           <CardContent>
             {isSubmitted && (

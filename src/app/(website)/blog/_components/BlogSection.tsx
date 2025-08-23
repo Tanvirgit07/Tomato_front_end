@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, MessageCircle, Heart, Share2, Calendar } from "lucide-react";
+import Image from "next/image";
 
 export default function BlogPage() {
   return (
@@ -152,7 +153,9 @@ export default function BlogPage() {
             >
               {/* Image Container */}
               <div className="relative overflow-hidden">
-                <img
+                <Image
+                width={300}
+                height={300}
                   src={post.image}
                   alt={post.title}
                   className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-700 ease-out"

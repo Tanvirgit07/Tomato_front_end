@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 interface Product {
   id: number;
@@ -63,7 +64,7 @@ export default function SimpleOfferGallery() {
           </h2>
           
           <p className="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed">
-            Don't miss out on these incredible deals. Premium products at prices that won't last long.
+            Don&apos;t miss out on these incredible deals. Premium products at prices that won&apos;t last long.
           </p>
         </div>
 
@@ -81,7 +82,9 @@ export default function SimpleOfferGallery() {
             >
               {/* Image Container */}
               <div className="relative overflow-hidden">
-                <img
+                <Image
+                width={300}
+                height={300}
                   src={product.image}
                   alt={product.title}
                   className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
@@ -142,7 +145,7 @@ export default function SimpleOfferGallery() {
           <div className="inline-flex items-center gap-4 bg-white rounded-3xl p-8 shadow-xl border border-slate-100">
             <div className="text-left">
               <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                Don't Miss Out!
+                Don&apos;t Miss Out!
               </h3>
               <p className="text-slate-600">
                 These exclusive offers end soon. Shop now and save big!

@@ -41,7 +41,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 2,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:
@@ -62,7 +62,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 3,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:
@@ -83,7 +83,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 4,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:
@@ -104,7 +104,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 5,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:
@@ -125,7 +125,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 6,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:
@@ -146,7 +146,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 7,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:
@@ -167,7 +167,7 @@ const blogData = [
     trending: true,
   },
   {
-    id: 1,
+    id: 8,
     title: "10 Essential E-commerce Trends That Will Dominate 2024",
     slug: "ecommerce-trends-2024",
     excerpt:

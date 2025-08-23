@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter } from "lucide-react";
 import { Star } from "lucide-react";
+import Image from "next/image";
 
 const products = [
   {
@@ -186,7 +187,9 @@ export default function AllProducts() {
                 >
                   {/* Image Container */}
                   <div className="relative overflow-hidden">
-                    <img
+                    <Image
+                    width={400}
+                    height={400}
                       src={product.image}
                       alt={product.name}
                       className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"

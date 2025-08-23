@@ -1,6 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type ProductHomeProps = {
@@ -165,7 +166,10 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden">
-                <img
+                <Image
+
+                width={300}
+                height={300}
                   src={dish.image}
                   alt={dish.name}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

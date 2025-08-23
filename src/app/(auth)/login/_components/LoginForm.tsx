@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import image from "@/../../public/images/signupImage.jpg"
+// import newImage from "@/../../public/images/signupImage.jpg"
 interface FormData {
   email: string;
   password: string;

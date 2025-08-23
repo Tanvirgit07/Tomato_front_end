@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import {
   Grid,
   List
 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Wishlists() {
   const [wishlistItems, setWishlistItems] = useState([
@@ -193,7 +195,9 @@ export default function Wishlists() {
                 <div className={viewMode === 'list' ? 'w-1/3 relative' : 'relative'}>
                   {/* Product Image */}
                   <div className="relative overflow-hidden">
-                    <img
+                    <Image
+                    width={300}
+                    height={300}
                       src={item.image}
                       alt={item.name}
                       className={`object-cover group-hover:scale-110 transition-transform duration-500 

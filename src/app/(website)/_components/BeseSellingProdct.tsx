@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Image from "next/image";
 
 const products = [
   {
@@ -176,7 +177,9 @@ const BestSellingProduct = () => {
                 >
                   {/* Image */}
                   <div className="relative w-full h-48 sm:h-56 lg:h-64 flex-shrink-0 overflow-hidden">
-                    <img
+                    <Image
+                    width={400}
+                    height={400}
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

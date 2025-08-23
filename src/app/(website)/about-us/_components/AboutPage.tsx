@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Heart, Globe, Star } from "lucide-react";
+import {  Heart, Globe, Star } from "lucide-react";
+import Image from "next/image";
 
 export default function AboutPage() {
   return (
@@ -32,7 +33,9 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="relative">
-              <img
+              <Image
+              width={500}
+              height={500}
                 src='/images/header_img.png'
                 alt="Our Story"
                 className="w-full h-80 object-cover rounded-3xl shadow-lg transform hover:scale-105 transition-transform duration-500"
@@ -127,7 +130,9 @@ export default function AboutPage() {
                 className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100"
               >
                 <CardContent className="p-6 text-center">
-                  <img
+                  <Image
+                  width={400}
+                  height={400}
                     src={member.image}
                     alt={member.name}
                     className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"

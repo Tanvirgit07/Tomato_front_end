@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Truck, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 
 export default function CheckoutPage() {
   const cartItems = [
@@ -145,7 +146,9 @@ export default function CheckoutPage() {
                     key={item.id}
                     className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300"
                   >
-                    <img
+                    <Image
+                    width={300}
+                    height={300}
                       src={item.image}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded-xl"

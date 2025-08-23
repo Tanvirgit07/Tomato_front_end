@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, ShoppingCart } from "lucide-react";
+import Image from "next/image";
 
 export default function CartPage() {
   const cartItems = [
@@ -65,7 +66,9 @@ export default function CartPage() {
                       key={item.id}
                       className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in"
                     >
-                      <img
+                      <Image
+                      width={300}
+                      height={300}
                         src={item.image}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded-xl"

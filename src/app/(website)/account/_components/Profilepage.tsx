@@ -10,7 +10,6 @@ import {
   Camera,
   Edit3,
   Mail,
-  Settings,
   Shield,
   ChevronRight,
   Crown,
