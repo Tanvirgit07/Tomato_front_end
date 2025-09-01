@@ -40,10 +40,11 @@ const Category = () => {
     },
   });
 
-  const categories = mainCategory?.categories || [];
+  const categories = mainCategory?.data || [];
 
   const handleCategoryClick = (categoryName: string) => {
     setActiveCategory(categoryName);
+    console.log(categoryName)
   };
 
   if (isLoading) return <p>Loading...</p>;
