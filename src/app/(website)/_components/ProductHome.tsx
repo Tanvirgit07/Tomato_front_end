@@ -1,22 +1,20 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ApiResponse, Product } from "../../../../types/product";
+import Link from "next/link";
 
 type ProductHomeProps = {
   activeCategory: string;
 };
 
-// Helper function to render stars
 const renderStars = (rating: number) => {
   const stars = [];
   for (let i = 0; i < 5; i++) {
     stars.push(
-      <span
-        key={i}
-        className={i < rating ? "text-amber-500" : "text-gray-300"}
-      >
+      <span key={i} className={i < rating ? "text-amber-500" : "text-gray-300"}>
         ★
       </span>
     );
@@ -44,9 +42,7 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch products");
-      }
+      if (!res.ok) throw new Error("Failed to fetch products");
 
       return res.json();
     },
@@ -57,27 +53,15 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
   }, []);
 
   const filteredProducts =
-    products?.data?.filter((item: Product) =>
-      activeCategory
-        ? item.category?.name?.toLowerCase() === activeCategory.toLowerCase()
-        : true
-    ) || [];
+    activeCategory === "All"
+      ? products?.data || []
+      : products?.data?.filter(
+          (item: Product) =>
+            item.category?.name?.toLowerCase() === activeCategory.toLowerCase()
+        ) || [];
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64 text-lg font-semibold">
-        Loading products...
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex justify-center items-center h-64 text-lg font-semibold text-red-500">
-        Failed to load products.
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex justify-center items-center h-64 text-lg font-semibold">Loading products...</div>;
+  if (isError) return <div className="flex justify-center items-center h-64 text-lg font-semibold text-red-500">Failed to load products.</div>;
 
   return (
     <div className="py-8 sm:py-12 lg:py-3">
@@ -102,31 +86,25 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
               <div
                 key={product._id}
                 className={`group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-slate-100 ${
-                  isVisible
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4"
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
                 }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
-                {/* Image */}
-                <div className="relative overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-
-                 
-
-                  {/* Category Badge */}
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-white/90 backdrop-blur-sm text-slate-700 px-3 py-1 rounded-full text-xs font-medium">
-                      {product.category?.name}
+                <Link href={`/products/${product._id}`}>
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                    <div className="absolute top-4 right-4">
+                      <div className="bg-white/90 backdrop-blur-sm text-slate-700 px-3 py-1 rounded-full text-xs font-medium">
+                        {product.category?.name}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
-                {/* Content */}
                 <div className="p-6 space-y-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
@@ -138,7 +116,6 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
                     />
                   </div>
 
-                  {/* Rating (mocked since API has no rating field) */}
                   <div className="flex items-center gap-3">
                     {renderStars(4)}
                     <span className="text-amber-600 font-semibold text-sm">
@@ -146,7 +123,6 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
                     </span>
                   </div>
 
-                  {/* Price */}
                   <div className="flex items-center justify-between pt-2">
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
@@ -168,7 +144,6 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
                   </div>
                 </div>
 
-                {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </div>
             );

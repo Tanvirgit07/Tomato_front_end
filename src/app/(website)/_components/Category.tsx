@@ -14,7 +14,7 @@ import { categoyMap } from "../../../../types";
 import Image from "next/image";
 
 const Category = () => {
-  const [activeCategory, setActiveCategory] = useState("Salad");
+  const [activeCategory, setActiveCategory] = useState("All");
 
   const {
     data: mainCategory,
@@ -34,7 +34,7 @@ const Category = () => {
       );
 
       if (!res.ok) {
-        throw new Error("Faild to fetch Data");
+        throw new Error("Failed to fetch Data");
       }
       return res.json();
     },
@@ -44,14 +44,11 @@ const Category = () => {
 
   const handleCategoryClick = (categoryName: string) => {
     setActiveCategory(categoryName);
-    console.log(categoryName)
   };
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error</p>;
-  if (mainCategory?.length === 0) {
-    return <p>No category found</p>;
-  }
+  if (categories.length === 0) return <p>No category found</p>;
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -69,7 +66,6 @@ const Category = () => {
         </div>
 
         {/* Categories Carousel */}
-        {/* Categories Carousel */}
         <div className="relative">
           <Carousel
             opts={{
@@ -79,8 +75,30 @@ const Category = () => {
             className="w-full"
           >
             <CarouselContent className="-ml-2 sm:-ml-3">
-              {" "}
-              {/* gap reduced */}
+              {/* All Category */}
+              <CarouselItem className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7">
+                <div
+                  onClick={() => handleCategoryClick("All")}
+                  className={`flex flex-col items-center cursor-pointer group transition-transform duration-300 p-2 sm:p-3 rounded-xl ${
+                    activeCategory === "All" ? "scale-105" : "hover:scale-105"
+                  }`}
+                >
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-md group-hover:ring-2 group-hover:ring-orange-200 flex items-center justify-center bg-orange-100">
+                    <span className="text-xl font-bold text-orange-500">All</span>
+                  </div>
+                  <h3
+                    className={`text-xs sm:text-sm lg:text-base font-semibold text-center transition-colors duration-300 ${
+                      activeCategory === "All"
+                        ? "text-orange-600"
+                        : "text-gray-800 group-hover:text-orange-600"
+                    }`}
+                  >
+                    All
+                  </h3>
+                </div>
+              </CarouselItem>
+
+              {/* Map other categories */}
               {categories.map((category: categoyMap) => (
                 <CarouselItem
                   key={category._id}
@@ -94,7 +112,6 @@ const Category = () => {
                         : "hover:scale-105"
                     }`}
                   >
-                    {/* Image Container */}
                     <div
                       className={`relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 ${
                         activeCategory === category.categoryName
@@ -110,8 +127,6 @@ const Category = () => {
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     </div>
-
-                    {/* Category Name */}
                     <h3
                       className={`text-xs sm:text-sm lg:text-base font-semibold text-center transition-colors duration-300 ${
                         activeCategory === category.categoryName
