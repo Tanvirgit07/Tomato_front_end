@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextAuthOptions } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -22,7 +23,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/login`,
+            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/signin`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -34,19 +35,25 @@ export const authOptions: NextAuthOptions = {
           );
 
           const response = await res.json();
+          console.log("🔎 API Response:", response);
 
-          if (!res.ok || !response?.status) {
+          // ❌ আগে ছিল: response?.status
+          // ✅ ঠিক হবে: response?.success
+          if (!res.ok || !response?.success) {
             throw new Error(response?.message || "Login failed");
           }
 
-          const { user, accessToken } = response.data;
+          // ❌ আগে ছিল: const { user, accessToken } = response.data;
+          // ✅ ঠিক হবে:
+          const { id, name, role, email, phonNumber } = response.data;
+          const accessToken = response.accessToken;
 
           return {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            profileImage: user.profileImage,
+            id,
+            name,
+            email,
+            role,
+            phoneNumber: phonNumber, // backend spelling অনুযায়ী phonNumber
             accessToken,
           };
         } catch (error) {
@@ -68,7 +75,7 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.email = user.email;
         token.role = user.role;
-        token.profileImage = user.profileImage;
+        token.phoneNumber = user.phoneNumber;
         token.accessToken = user.accessToken;
       }
       return token;
@@ -80,7 +87,7 @@ export const authOptions: NextAuthOptions = {
         name: token.name,
         email: token.email,
         role: token.role,
-        profileImage: token.profileImage,
+        phoneNumber: token.phoneNumber,
         accessToken: token.accessToken,
       };
       return session;

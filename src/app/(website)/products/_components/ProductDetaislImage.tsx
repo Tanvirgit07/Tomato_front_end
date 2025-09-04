@@ -1,8 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState } from "react";
-import Image, { StaticImageData } from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,11 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import productImage1 from "../../../../../public/images/produc4.jpg";
-import productImage2 from "../../../../../public/images/product1.jpg";
-import productImage3 from "../../../../../public/images/product2.jpg";
-import productImage4 from "../../../../../public/images/product3.jpg";
 import Link from "next/link";
+import Image from "next/image";
+
+interface SubImage {
+  url: string;
+  publicId: string;
+  _id: string;
+}
 
 interface ProductData {
   _id: string;
@@ -25,6 +26,7 @@ interface ProductData {
   price: number;
   discountPrice: number;
   image: string;
+  subImages: SubImage[];
   category: {
     _id: string;
     name: string;
@@ -47,52 +49,27 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>("");
 
-  // Use API data with fallback to dummy data for missing fields
+  // Construct the images array using API data
   const displayData = {
     id: Array.isArray(productId) ? productId[0] : productId,
-    title: productData.name || "Lorem ipsum dolor sit amet, consectetur efficitur.",
-    price: productData.discountPrice || productData.price || 54,
+    title: productData.name || "Unnamed Product",
+    price: productData.discountPrice || productData.price || 0,
     originalPrice: productData.price,
-    // For now, use placeholder images - you can add multiple images to your API later
     images: [
       {
         id: 0,
-        src: productData.image || productImage1,
+        src: productData.image,
         alt: `${productData.name} - Main View`,
-        isExternal: !!productData.image, // Track if it's from API
       },
-      {
-        id: 1,
-        src: productImage2,
-        alt: `${productData.name} - Side View`,
-        isExternal: false,
-      },
-      {
-        id: 2,
-        src: productImage3,
-        alt: `${productData.name} - Back View`,
-        isExternal: false,
-      },
-      {
-        id: 3,
-        src: productImage4,
-        alt: `${productData.name} - Detail View`,
-        isExternal: false,
-      },
-      {
-        id: 4,
-        src: productImage3,
-        alt: `${productData.name} - Full View`,
-        isExternal: false,
-      },
+      ...productData.subImages.map((img, index) => ({
+        id: index + 1,
+        src: img.url,
+        alt: `${productData.name} - View ${index + 1}`,
+      })),
     ],
     features: [
       `Category: ${productData.category?.name || "General"}`,
       `Sub-Category: ${productData.subCategory?.name || "Standard"}`,
-      "Slim-fit 100% Wool Super 140's", // Placeholder - add to API later
-      "Color: Black", // Placeholder - add to API later
-      "Pattern: Plain Weave", // Placeholder - add to API later
-      "Closure: 2 Button", // Placeholder - add to API later
     ],
   };
 
@@ -103,9 +80,7 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
         title: displayData.title,
         size: selectedSize || "Not selected",
         price: displayData.price,
-        image: typeof displayData.images[selectedImage].src === "string"
-          ? displayData.images[selectedImage].src
-          : (displayData.images[selectedImage].src as StaticImageData),
+        image: displayData.images[selectedImage].src,
         quantity: 1,
       };
 
@@ -142,60 +117,43 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
     <div className="container mx-auto p-4 sm:p-6 bg-white lg:mt-[83px] md:mt-[60px] mt-[40px] lg:mb-[40px] md:mb-[30px] mb-[20px]">
       <div className="flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 lg:gap-[100px]">
         {/* Image Gallery Section */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:max-w-[600px]">
-          {/* Thumbnail Column */}
-          <div className="flex sm:flex-col gap-3 order-1 sm:order-none">
+        <div className="flex flex-col gap-3 sm:gap-4 w-full sm:max-w-[600px]">
+          {/* Main Image */}
+          <div className="w-full">
+            <Card className="overflow-hidden w-full h-full">
+              <CardContent className="p-0">
+                <Image
+                  width={400}
+                  height={400}
+                  src={displayData.images[selectedImage].src}
+                  alt={displayData.images[selectedImage].alt}
+                  className="w-full h-[200px] sm:h-[300px] object-cover"
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Thumbnail Row */}
+          <div className="flex flex-row gap-[20px] overflow-x-auto">
             {displayData.images.map((image) => (
               <Card
                 key={image.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                className={`cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0 ${
                   selectedImage === image.id ? "ring-2 ring-blue-500" : ""
                 }`}
                 onClick={() => setSelectedImage(image.id)}
               >
                 <CardContent className="p-0">
-                  {image.isExternal ? (
-                    <img
-                      src={image.src as string}
-                      alt={image.alt}
-                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md"
-                    />
-                  ) : (
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md"
-                    />
-                  )}
+                  <Image
+                    width={300}
+                    height={300}
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md"
+                  />
                 </CardContent>
               </Card>
             ))}
-          </div>
-
-          {/* Main Image */}
-          <div className="flex-1 w-full sm:min-w-[280px] sm:max-w-[500px]">
-            <Card className="overflow-hidden w-full h-full transition-transform duration-300 transform hover:scale-105">
-              <CardContent className="p-0">
-                {displayData.images[selectedImage].isExternal ? (
-                  <img
-                    src={displayData.images[selectedImage].src as string}
-                    alt={displayData.images[selectedImage].alt}
-                    className="w-full h-[400px] sm:h-[650px] object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={displayData.images[selectedImage].src}
-                    alt={displayData.images[selectedImage].alt}
-                    width={500}
-                    height={500}
-                    className="w-full h-[400px] sm:h-[650px] object-cover"
-                    priority
-                  />
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
 
@@ -206,10 +164,10 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
             <h1 className="text-[18px] sm:text-[22px] md:text-[30px] lg:text-[40px] font-semibold text-[#212121] leading-[120%]">
               {displayData.title}
             </h1>
-            <div 
+            <div
               className="text-[16px] sm:text-[20px] leading-[150%] font-normal text-[#4E4E4E] mt-2 sm:mt-3"
-              dangerouslySetInnerHTML={{ 
-                __html: productData.description || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt porta laoreet. Praesent a leo at leo ornare mollis eget sit amet lorem. Integer dignissim laoreet justo ut sagittis." 
+              dangerouslySetInnerHTML={{
+                __html: productData.description || "No description available.",
               }}
             />
           </div>
@@ -252,11 +210,12 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
               <span className="text-2xl sm:text-4xl font-bold text-gray-900">
                 ${displayData.price}
               </span>
-              {displayData.originalPrice && displayData.originalPrice !== displayData.price && (
-                <span className="text-lg sm:text-xl text-gray-500 line-through">
-                  ${displayData.originalPrice}
-                </span>
-              )}
+              {displayData.originalPrice &&
+                displayData.originalPrice !== displayData.price && (
+                  <span className="text-lg sm:text-xl text-gray-500 line-through">
+                    ${displayData.originalPrice}
+                  </span>
+                )}
             </div>
           </div>
 

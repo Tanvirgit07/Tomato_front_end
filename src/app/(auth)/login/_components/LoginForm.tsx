@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
@@ -7,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-// import newImage from "@/../../public/images/signupImage.jpg"
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 interface FormData {
   email: string;
   password: string;
@@ -15,6 +18,8 @@ interface FormData {
 }
 
 const LoginForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -29,39 +34,60 @@ const LoginForm = () => {
     }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     console.log("Sign In Data:", formData);
+    try {
+      setIsLoading(true);
+
+      const res = await signIn("credentials", {
+        email: formData?.email,
+        password: formData?.password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        throw new Error(res?.error);
+      }
+
+      toast.success("Login Successfully !");
+      router.push("/");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left side - Image */}
       <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
+        <Image
+          src="/images/signupImage.jpg"
+          alt="Sign Up Illustration"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute top-8 left-8 z-10">
+          <div className="flex items-center space-x-2">
+            <div className="h-[70px] w-[70px] flex items-center justify-center">
               <Image
-                src="/images/signupImage.jpg"
-                alt="Sign Up Illustration"
-                fill
+                src="/images/source.gif"
+                width={200}
+                height={200}
                 className="object-cover"
+                alt="logo image"
               />
-              <div className="absolute inset-0 bg-black/30" />
-              <div className="absolute top-8 left-8 z-10">
-                <div className="flex items-center space-x-2">
-                  <div className="h-[70px] w-[70px] flex items-center justify-center">
-                    <Image
-                      src="/images/source.gif"
-                      width={200}
-                      height={200}
-                      className="object-cover"
-                      alt="logo image"
-                    />
-                  </div>
-                  <span className="text-2xl font-bold text-white">
-                    T<span className="text-red-400">O</span>MAT<span className="text-red-400">O</span>
-                  </span>
-                </div>
-              </div>
             </div>
+            <span className="text-2xl font-bold text-white">
+              T<span className="text-red-400">O</span>MAT
+              <span className="text-red-400">O</span>
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Right side - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-start p-6 bg-gray-50">
@@ -137,9 +163,10 @@ const LoginForm = () => {
 
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full text-base h-[51px] bg-[#EF1A26] hover:bg-[#ee5e65] text-white py-2 rounded-md transition"
               >
-                Login
+                {isLoading ? "Sign In..." : "Sign in "}
               </Button>
             </form>
           </CardContent>

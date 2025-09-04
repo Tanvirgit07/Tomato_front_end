@@ -6,23 +6,59 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 interface FormData {
   name: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   password: string;
   confirmPassword: string;
-  agreeTerms: boolean;
+  termsAndCondition: boolean;
 }
 
 const SignUpFrom: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
-    agreeTerms: false,
+    termsAndCondition: false,
+  });
+  
+  const router = useRouter();
+
+  const createUserMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: async (body: any) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create user");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message)
+      router.push("/login");
+    }, 
+
+    onError: (err) => {
+      toast.error(err.message)
+    }
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,12 +67,13 @@ const SignUpFrom: React.FC = () => {
   };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, agreeTerms: checked }));
+    setFormData((prev) => ({ ...prev, termsAndCondition: checked }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted:", formData);
+    createUserMutation.mutate(formData);
   };
 
   return (
@@ -62,7 +99,8 @@ const SignUpFrom: React.FC = () => {
               />
             </div>
             <span className="text-2xl font-bold text-white">
-              T<span className="text-red-400">O</span>MAT<span className="text-red-400">O</span>
+              T<span className="text-red-400">O</span>MAT
+              <span className="text-red-400">O</span>
             </span>
           </div>
         </div>
@@ -126,10 +164,10 @@ const SignUpFrom: React.FC = () => {
               </Label>
               <Input
                 id="phone"
-                name="phone"
+                name="phoneNumber"
                 type="tel"
                 placeholder="Enter your phone number"
-                value={formData.phone}
+                value={formData.phoneNumber}
                 onChange={handleInputChange}
                 className="h-[51px] border border-[#272727] mt-2"
                 required
@@ -176,12 +214,12 @@ const SignUpFrom: React.FC = () => {
 
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="agreeTerms"
-                checked={formData.agreeTerms}
+                id="termsAndCondition"
+                checked={formData.termsAndCondition}
                 onCheckedChange={handleCheckboxChange}
                 className="w-5 h-5 rounded-sm border-gray-300 text-red-600 focus:ring-red-500"
               />
-              <Label htmlFor="agreeTerms" className="text-sm text-gray-700">
+              <Label htmlFor="termsAndCondition" className="text-sm text-gray-700">
                 I agree to the Terms & Conditions
               </Label>
             </div>
