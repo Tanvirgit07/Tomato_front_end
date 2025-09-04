@@ -34,7 +34,6 @@ interface ProductDetailsContentProps {
 }
 
 const ProductDetailsContent: React.FC<ProductDetailsContentProps> = ({ productData }) => {
-  // Create dynamic content sections based on API data and placeholders
   const contentSections: ContentSection[] = [
     {
       paragraph: productData.description ? 
@@ -77,46 +76,7 @@ const ProductDetailsContent: React.FC<ProductDetailsContentProps> = ({ productDa
   return (
     <div className="container mx-auto py-6 bg-white px-4 lg:px-0 md:px-0">
       {/* Main Heading */}
-      <div className="mb-8">
-        <h1 className="lg:text-[32px] md:text-[28px] text-[20px] font-semibold leading-[120%] mb-4">
-          What will you get?
-        </h1>
-        
-        {/* Content Sections */}
-        <div className="space-y-8">
-          {contentSections.map((section, index) => (
-            <div key={index} className="space-y-4">
-              {/* Section Title */}
-              {section.title && (
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {section.title}
-                </h2>
-              )}
-              
-              {/* Section Paragraph */}
-              {section.paragraph && (
-                <p className="text-gray-700 leading-relaxed text-justify">
-                  {section.paragraph}
-                </p>
-              )}
-              
-              {/* Bullet Points */}
-              {section.bulletPoints && (
-                <ul className="space-y-2 ml-4">
-                  {section.bulletPoints.map((point, pointIndex) => (
-                    <li key={pointIndex} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-gray-600 rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-gray-700 leading-relaxed">
-                        {point.text}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+     <div dangerouslySetInnerHTML={{__html: productData.description}}/>
     </div>
   )
 }

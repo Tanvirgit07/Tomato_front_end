@@ -49,6 +49,8 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
   const [selectedImage, setSelectedImage] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>("");
 
+  console.log("productDetails", productData)
+
   // Construct the images array using API data
   const displayData = {
     id: Array.isArray(productId) ? productId[0] : productId,
@@ -164,12 +166,6 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
             <h1 className="text-[18px] sm:text-[22px] md:text-[30px] lg:text-[40px] font-semibold text-[#212121] leading-[120%]">
               {displayData.title}
             </h1>
-            <div
-              className="text-[16px] sm:text-[20px] leading-[150%] font-normal text-[#4E4E4E] mt-2 sm:mt-3"
-              dangerouslySetInnerHTML={{
-                __html: productData.description || "No description available.",
-              }}
-            />
           </div>
 
           {/* Product Features */}
@@ -182,26 +178,6 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
                 </span>
               </div>
             ))}
-          </div>
-
-          {/* Size Selection */}
-          <div className="space-y-2 flex items-center gap-4 sm:gap-6">
-            <label className="text-xl sm:text-2xl text-[#4E4E4E] font-semibold mt-2">
-              Size:
-            </label>
-            <Select value={selectedSize} onValueChange={setSelectedSize}>
-              <SelectTrigger className="w-36 sm:w-40">
-                <SelectValue placeholder="Medium" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="xs">Extra Small</SelectItem>
-                <SelectItem value="s">Small</SelectItem>
-                <SelectItem value="m">Medium</SelectItem>
-                <SelectItem value="l">Large</SelectItem>
-                <SelectItem value="xl">Extra Large</SelectItem>
-                <SelectItem value="xxl">XXL</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Price */}
@@ -221,17 +197,6 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Link
-              href={`/customize-product/panel/${displayData.id}`}
-              className="flex-1 w-full"
-            >
-              <Button
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200"
-                size="lg"
-              >
-                Customize
-              </Button>
-            </Link>
             <Button
               className="flex-1 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg"
               size="lg"

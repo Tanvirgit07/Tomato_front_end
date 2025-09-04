@@ -36,6 +36,7 @@ function AllReview() {
     );
 
   const reviews = data?.data ?? [];
+  console.log("reviews" , reviews)
   if (reviews.length === 0)
     return (
       <div className="text-center py-10 text-gray-500">No reviews found</div>
