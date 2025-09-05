@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { ApiResponse } from "../../../../../types/product";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import {
   Select,
@@ -14,11 +15,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Category } from "../../../../../types/category";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+  const session = useSession();
+  const user = session?.data?.user as any; // bypass TS check
+  const userId = user?.id;
 
   const {
     data: products,
@@ -60,6 +66,38 @@ export default function AllProducts() {
     },
   });
   const categories = mainCategory?.data || [];
+
+  const addToCartMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      if (!userId) throw new Error("User not logged in");
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/addtocart/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Uncomment if your API needs token
+            // "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+          body: JSON.stringify({ productId }), // <-- sending productId in body
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to add to cart");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-12">
@@ -180,7 +218,10 @@ export default function AllProducts() {
                     </div>
                   </div>
 
-                  <button className="bg-gradient-to-r from-orange-500 to-red-400 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                  <button
+                    onClick={() => addToCartMutation.mutate(p?._id)}
+                    className="bg-gradient-to-r from-orange-500 to-red-400 hover:from-indigo-600 hover:to-purple-600 text-white px-4 py-2 rounded-2xl text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  >
                     Add to Cart
                   </button>
                 </div>
