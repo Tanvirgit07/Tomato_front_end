@@ -1,35 +1,90 @@
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trash2, ShoppingCart } from "lucide-react";
+import { Trash2, ShoppingCart, Minus, Plus } from "lucide-react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function CartPage() {
-  const cartItems = [
-    {
-      id: 1,
-      name: "Silk Sculpt Serum",
-      image: "https://images.unsplash.com/photo-1616394584738-fc6e6126b1c8?w=100&h=100&fit=crop",
-      price: 25.00,
-      quantity: 2,
-    },
-    {
-      id: 2,
-      name: "Glow Essence Oil",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&h=100&fit=crop",
-      price: 35.00,
-      quantity: 1,
-    },
-    {
-      id: 3,
-      name: "Velvet Moisturizer",
-      image: "https://images.unsplash.com/photo-1512496015850-a8ee5066e54c?w=100&h=100&fit=crop",
-      price: 22.50,
-      quantity: 3,
-    },
-  ];
+  const session = useSession();
+  const user = session?.data?.user as any;
+  const userId = user?.id;
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = subtotal * 0.1; // 10% tax
+  const queryClient = useQueryClient();
+
+  // Fetch cart data
+  const { data: cartData, isLoading } = useQuery({
+    queryKey: ["cart", userId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/cartuser/${userId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      return res.json();
+    },
+    enabled: !!userId,
+  });
+
+  // Update quantity mutation
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({
+      productId,
+      action,
+    }: {
+      productId: string;
+      action: "increment" | "decrement";
+    }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/update/${userId}/${productId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to update cart");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  // Delete item mutation
+  const deleteItemMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/deletecartitem/${userId}/${productId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to delete cart item");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  const items = cartData?.data || [];
+  const subtotal = items.reduce(
+    (sum: number, item: any) =>
+      sum + item.productId.discountPrice * item.quantity,
+    0
+  );
+  const tax = subtotal * 0.1;
   const total = subtotal + tax;
 
   return (
@@ -39,7 +94,9 @@ export default function CartPage() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-200 to-purple-200 px-4 py-2 rounded-full mb-4 shadow-sm">
             <ShoppingCart className="w-5 h-5 text-indigo-700" />
-            <span className="text-indigo-700 font-semibold text-sm">Your Cart</span>
+            <span className="text-indigo-700 font-semibold text-sm">
+              Your Cart
+            </span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-800 to-purple-600 bg-clip-text text-transparent mb-4">
             Your Shopping Cart
@@ -55,33 +112,88 @@ export default function CartPage() {
           <div className="w-full lg:w-2/3">
             <Card className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-indigo-100">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-indigo-800">Cart Items</CardTitle>
+                <CardTitle className="text-2xl font-bold text-indigo-800">
+                  Cart Items
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {cartItems.length === 0 ? (
-                  <p className="text-gray-600 text-center">Your cart is empty.</p>
+                {isLoading ? (
+                  <p className="text-center text-gray-500">Loading cart...</p>
+                ) : items.length === 0 ? (
+                  <p className="text-gray-600 text-center">
+                    Your cart is empty.
+                  </p>
                 ) : (
-                  cartItems.map((item) => (
+                  items.map((item: any) => (
                     <div
-                      key={item.id}
-                      className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in"
+                      key={item._id}
+                      className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300"
                     >
                       <Image
-                      width={300}
-                      height={300}
-                        src={item.image}
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded-xl"
+                        width={80}
+                        height={80}
+                        src={item.productId.image}
+                        alt={item.productId.name}
+                        className="w-20 h-20 object-cover rounded-xl"
                       />
                       <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-indigo-900">{item.name}</h3>
+                        <h3 className="text-lg font-semibold text-indigo-900">
+                          {item.productId.name}
+                        </h3>
                         <p className="text-gray-600 text-sm">
-                          ${item.price.toFixed(2)} x {item.quantity} = ${(item.price * item.quantity).toFixed(2)}
+                          ${item.productId.discountPrice} x {item.quantity} ={" "}
+                          <span className="font-semibold text-indigo-700">
+                            $
+                            {(
+                              item.productId.discountPrice * item.quantity
+                            ).toFixed(2)}
+                          </span>
                         </p>
                       </div>
+
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            updateQuantityMutation.mutate({
+                              productId: item.productId._id,
+                              action: "decrement",
+                            })
+                          }
+                          disabled={updateQuantityMutation.isPending}
+                          className="rounded-full w-8 h-8"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-8 text-center font-semibold">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            updateQuantityMutation.mutate({
+                              productId: item.productId._id,
+                              action: "increment",
+                            })
+                          }
+                          disabled={updateQuantityMutation.isPending}
+                          className="rounded-full w-8 h-8"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      {/* Delete Button */}
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() =>
+                          deleteItemMutation.mutate(item.productId._id)
+                        }
+                        disabled={deleteItemMutation.isPending}
                         className="text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -95,9 +207,11 @@ export default function CartPage() {
 
           {/* Cart Summary */}
           <div className="w-full lg:w-1/3">
-            <Card className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-indigo-100">
+            <Card className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-indigo-100 sticky top-24">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-indigo-800">Order Summary</CardTitle>
+                <CardTitle className="text-2xl font-bold text-indigo-800">
+                  Order Summary
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-gray-600">
@@ -112,9 +226,7 @@ export default function CartPage() {
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
-                <Button
-                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-2xl py-3 font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                >
+                <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-2xl py-3 font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                   Proceed to Checkout
                 </Button>
               </CardContent>

@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, ShoppingBasket, Menu, X, User, Heart } from "lucide-react";
+import {
+  Search,
+  ShoppingBasket,
+  Menu,
+  X,
+  Heart,
+  CircleUser,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,6 +25,31 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const session = useSession();
+  const user = session?.data?.user as any;
+  const userId = user?.id;
+
+  const { data: cartData } = useQuery({
+    queryKey: ["cart", userId], // static query key
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/cartuser/${userId}`
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch cart data");
+      }
+
+      return res.json();
+    },
+  });
+
+  const totalQuantity = cartData?.data?.reduce(
+    (sum: number, item: any) => sum + (item.quantity || 0),
+    0
+  );
+
+  console.log("Total Quantity:", totalQuantity);
   return (
     <nav className="bg-white shadow-xl sticky top-0 z-50 border-b border-gray-100">
       <div className="container mx-auto">
@@ -85,9 +113,9 @@ const Navbar = () => {
               asChild
             >
               <Link href="/wishlist">
-                <Heart className="w-6 h-6" />
+                <Heart className="!w-8 !h-8" />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-7 w-7 flex items-center justify-center">
                     {wishlistCount}
                   </span>
                 )}
@@ -101,48 +129,24 @@ const Navbar = () => {
               asChild
             >
               <Link href="/cart">
-                <ShoppingBasket className="w-6 h-6" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartCount}
+                <ShoppingBasket className="!w-8 !h-8" />
+                {totalQuantity > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-7 w-7 flex items-center justify-center">
+                    {totalQuantity}
                   </span>
                 )}
               </Link>
             </Button>
 
-            {/* Account Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300"
-                >
-                  <User className="w-7 h-7" />
-                  <span className="sr-only">Account</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2"
-              >
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/login"
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors duration-200"
-                  >
-                    Login
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/signup"
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors duration-200"
-                  >
-                    Sign Up
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="ghost"
+              className="relative p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300"
+              asChild
+            >
+              <Link href="/account">
+                <CircleUser className="!w-8 !h-8" />
+              </Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -154,7 +158,7 @@ const Navbar = () => {
               asChild
             >
               <Link href="/wishlist">
-                <Heart className="w-6 h-6" />
+                <Heart className="!w-8 !h-8" />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {wishlistCount}
@@ -170,7 +174,7 @@ const Navbar = () => {
               asChild
             >
               <Link href="/cart">
-                <ShoppingBasket className="w-6 h-6" />
+                <ShoppingBasket className="!w-8 !h-8" />
                 {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {cartCount}
@@ -178,40 +182,6 @@ const Navbar = () => {
                 )}
               </Link>
             </Button>
-
-            {/* Mobile Account */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300"
-                >
-                  <User className="w-7 h-7" />
-                  <span className="sr-only">Account</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 bg-white border border-gray-200 rounded-lg shadow-xl p-2"
-              >
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/login"
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors duration-200"
-                  >
-                    Login
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/signup"
-                    className="w-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md transition-colors duration-200"
-                  >
-                    Sign Up
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
             {/* Hamburger Menu */}
             <Button

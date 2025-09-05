@@ -24,7 +24,7 @@ export default function RootLayout({
             <Navbar />
             {children}
             <Footer />
-            <Toaster richColors position="top-center" /> 
+            <Toaster richColors position="bottom-right" /> 
           </AppProvider>
         </AuthProvider>
       </body>
