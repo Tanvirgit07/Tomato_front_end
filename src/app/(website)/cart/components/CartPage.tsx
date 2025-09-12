@@ -25,7 +25,6 @@ export default function CartPage() {
       if (!res.ok) throw new Error("Failed to fetch cart");
       return res.json();
     },
-    enabled: !!userId,
   });
 
   // Update quantity mutation
@@ -79,6 +78,9 @@ export default function CartPage() {
   });
 
   const items = cartData?.data || [];
+  // console.log("items", items)
+
+
   const subtotal = items.reduce(
     (sum: number, item: any) =>
       sum + item.productId.discountPrice * item.quantity,
@@ -86,6 +88,18 @@ export default function CartPage() {
   );
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
+
+
+
+  const handlePayment = () => {
+    const body = {
+      products: items,
+      userId: userId
+    }
+    console.log("body", body)
+  }
+
+
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 py-12">
@@ -226,7 +240,7 @@ export default function CartPage() {
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
-                <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-2xl py-3 font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <Button onClick={() => handlePayment()} className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-2xl py-3 font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                   Proceed to Checkout
                 </Button>
               </CardContent>
