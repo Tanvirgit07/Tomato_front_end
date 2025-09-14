@@ -132,6 +132,7 @@ export default function AllProducts() {
     },
   });
   const wishlist = wishlistData?.data || [];
+  console.log("wishlist", wishlist)
 
   // add to wishlist
   const addToWishlistMutation = useMutation({
@@ -225,16 +226,14 @@ export default function AllProducts() {
                     shadow-md
                     cursor-pointer
                     ${
-                      wishlist.some(
-                        (item: any) => item.productId === p._id
-                      )
+                      wishlist.some((item: any) => item.productId._id === p._id)
                         ? "bg-red-100 hover:bg-red-200"
                         : "bg-white hover:bg-red-50"
                     }
                   `}
                   onClick={() => {
                     if (
-                      !wishlist.some((item: any) => item.productId === p._id)
+                      !wishlist.some((item: any) => item.productId._id === p._id)
                     ) {
                       addToWishlistMutation.mutate(p._id);
                     } else {
@@ -247,9 +246,7 @@ export default function AllProducts() {
                     className={`
                       transition-all duration-300
                       ${
-                        wishlist.some(
-                          (item: any) => item.productId === p._id
-                        )
+                        wishlist.some((item: any) => item.productId._id === p._id)
                           ? "text-red-500 fill-red-500 scale-110"
                           : "text-red-500 hover:scale-110"
                       }

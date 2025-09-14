@@ -28,9 +28,10 @@ const Navbar = () => {
   const session = useSession();
   const user = session?.data?.user as any;
   const userId = user?.id;
+  console.log(session);
 
   const { data: cartData } = useQuery({
-    queryKey: ["cart", userId], // static query key
+    queryKey: ["cart", userId],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/cartuser/${userId}`
@@ -43,13 +44,32 @@ const Navbar = () => {
       return res.json();
     },
   });
+  console.log("cartData", cartData);
+
+  const { data: wishlist } = useQuery({
+    queryKey: ["wishlist", userId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/wishlist/getwishlist/${userId}`
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch wishlist data");
+      }
+
+      return res.json();
+    },
+  });
+
+  console.log("wishlist", wishlist);
 
   const totalQuantity = cartData?.data?.reduce(
     (sum: number, item: any) => sum + (item.quantity || 0),
     0
   );
 
-  console.log("Total Quantity:", totalQuantity);
+  const totalWishlist = wishlist?.data?.length ?? 0;
+
   return (
     <nav className="bg-white shadow-xl sticky top-0 z-50 border-b border-gray-100">
       <div className="container mx-auto">
@@ -78,7 +98,7 @@ const Navbar = () => {
               { label: "Home", href: "/" },
               { label: "Products", href: "/products" },
               { label: "About Us", href: "/about-us" },
-              { label: "Blog & Expert Tips", href: "/blog" },
+              { labproductIdel: "Blog & Expert Tips", href: "/blog" },
             ].map((item) => (
               <Link
                 key={item.label}
@@ -114,9 +134,9 @@ const Navbar = () => {
             >
               <Link href="/wishlist">
                 <Heart className="!w-8 !h-8" />
-                {wishlistCount > 0 && (
+                {totalWishlist > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-7 w-7 flex items-center justify-center">
-                    {wishlistCount}
+                    {totalWishlist}
                   </span>
                 )}
               </Link>
@@ -138,15 +158,25 @@ const Navbar = () => {
               </Link>
             </Button>
 
-            <Button
-              variant="ghost"
-              className="relative p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300"
-              asChild
-            >
-              <Link href="/account">
-                <CircleUser className="!w-8 !h-8" />
-              </Link>
-            </Button>
+            {session?.status === "authenticated" ? (
+              <Button
+                variant="ghost"
+                className="relative p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-all duration-300"
+                asChild
+              >
+                <Link href="/account">
+                  <CircleUser className="!w-8 !h-8" />
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-white hover:bg-red-500 transition-all duration-300 rounded-full"
+                asChild
+              >
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

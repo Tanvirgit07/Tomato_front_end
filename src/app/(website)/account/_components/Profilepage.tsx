@@ -12,39 +12,31 @@ import {
   Mail,
   Shield,
   ChevronRight,
-  Crown,
-  Verified,
 } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 export default function Profilepage() {
   const [isHovering, setIsHovering] = useState(false);
-  const [user] = useState({
-    name: "Alexa Rawles",
-    email: "alexarawles@gmail.com",
-    avatar: "/api/placeholder/120/120",
-    isPremium: true,
-    isVerified: true,
-    joinDate: "January 2024",
-  });
+  const session = useSession();
+  const user = session?.data?.user as any; // user info from API
+
+  console.log(session);
 
   const handlePersonalInfo = () => {
     console.log("Navigate to Personal Information");
-    // Add navigation logic here
   };
 
   const handleChangePassword = () => {
     console.log("Navigate to Change Password");
-    // Add navigation logic here
   };
 
   const handleImageUpload = () => {
     console.log("Upload new profile image");
-    // Add image upload logic here
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -56,7 +48,7 @@ export default function Profilepage() {
 
         {/* Main Profile Card */}
         <div className="max-w-2xl mx-auto">
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <Card className="">
             <CardHeader className="relative overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
@@ -80,11 +72,11 @@ export default function Profilepage() {
                     onMouseLeave={() => setIsHovering(false)}
                   >
                     <Avatar className="h-32 w-32 border-4 border-white shadow-xl ring-4 ring-white/50 transition-transform duration-300 group-hover:scale-105">
-                      <AvatarImage src={user.avatar} alt={user.name} />
+                      <AvatarImage src={user?.avatar || ""} alt={user?.name} />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-3xl font-bold">
-                        {user.name
-                          .split(" ")
-                          .map((n) => n[0])
+                        {user?.name
+                          ?.split(" ")
+                          .map((n: string) => n[0])
                           .join("")}
                       </AvatarFallback>
                     </Avatar>
@@ -110,30 +102,11 @@ export default function Profilepage() {
 
                 {/* User Info */}
                 <div className="mt-6 text-white">
+                  <h2 className="text-2xl font-bold mb-2">{user?.name}</h2>
+
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <h2 className="text-2xl font-bold">{user.name}</h2>
-                    {user.isVerified && (
-                      <Verified className="h-6 w-6 text-blue-300" />
-                    )}
-                    {user.isPremium && (
-                      <Crown className="h-6 w-6 text-yellow-300" />
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-center gap-2 mb-4">
                     <Mail className="h-4 w-4 text-gray-300" />
-                    <p className="text-gray-200">{user.email}</p>
-                  </div>
-
-                  <div className="flex justify-center gap-2">
-                    {user.isPremium && (
-                      <Badge className="bg-yellow-500/20 text-yellow-200 border-yellow-500/30">
-                        Premium Member
-                      </Badge>
-                    )}
-                    <Badge className="bg-blue-500/20 text-blue-200 border-blue-500/30">
-                      Member since {user.joinDate}
-                    </Badge>
+                    <p className="text-gray-200">{user?.email} ({user?.role})</p>
                   </div>
                 </div>
               </div>
@@ -142,7 +115,7 @@ export default function Profilepage() {
             <CardContent className="p-8">
               {/* Action Buttons */}
               <div className="space-y-4">
-                <div className="">
+                <div>
                   <Link href="/account/personalInfo">
                     <Button
                       onClick={handlePersonalInfo}
@@ -195,14 +168,6 @@ export default function Profilepage() {
                     </Button>
                   </Link>
                 </div>
-              </div>
-
-              {/* Footer Note */}
-              <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-600 text-center">
-                  <Shield className="h-4 w-4 inline mr-2" />
-                  Your account is secured with industry-standard encryption
-                </p>
               </div>
             </CardContent>
           </Card>

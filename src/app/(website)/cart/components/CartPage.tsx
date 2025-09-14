@@ -109,6 +109,8 @@ export default function CartPage() {
   const tax = subtotal * 0.1;
   const total = subtotal + tax;
 
+
+
   const paymentMutation = useMutation({
     mutationFn: async (bodyData: CartData) => {
       const res = await fetch(
@@ -145,7 +147,6 @@ export default function CartPage() {
       products: items,
       userId: userId,
     };
-    console.log("body", body);
     paymentMutation.mutate(body)
   };
 

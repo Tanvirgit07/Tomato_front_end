@@ -1,291 +1,365 @@
-"use client"
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Plus } from 'lucide-react';
+"use client";
 
-const formSchema = z.object({
-  fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
-  nickName: z.string().optional(),
-  gender: z.string().min(1, { message: "Please select a gender." }),
-  country: z.string().min(1, { message: "Please select a country." }),
-  language: z.string().min(1, { message: "Please select a language." }),
-  timeZone: z.string().min(1, { message: "Please select a time zone." }),
-  emailAddresses: z.array(z.object({
-    email: z.string().email(),
-    isPrimary: z.boolean(),
-    addedAt: z.string()
-  })).min(1, { message: "At least one email is required." })
+import React, { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+
+// Zod schema
+const personalInfoSchema = z.object({
+  name: z.string().min(2).max(50).trim(),
+  email: z.string().email().trim().toLowerCase(),
+  phoneNumber: z.string().min(10).trim(),
+  profileImageFile: z.any().optional(),
+  bio: z.string().max(200).optional(),
+  address: z.object({
+    street: z.string().optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
+    zip: z.string().optional(),
+  }),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
 
-export default function PersonalInformation() {
-  const [emails, setEmails] = useState([
-    {
-      email: 'alexarawles@gmail.com',
-      isPrimary: true,
-      addedAt: '1 month ago'
-    }
-  ]);
+interface User {
+  _id: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  bio?: string;
+  profileImage?: string;
+  address?: {
+    street?: string;
+    city?: string;
+    country?: string;
+    zip?: string;
+  };
+}
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+interface ApiResponse {
+  message: string;
+  user: User;
+}
+
+const PersonalInformation: React.FC = () => {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+  const queryClient = useQueryClient();
+  const user = session?.user as any;
+  const userId = user?.id || user?._id;
+
+  const form = useForm<PersonalInfoFormValues>({
+    resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      fullName: '',
-      nickName: '',
-      gender: '',
-      country: '',
-      language: '',
-      timeZone: '',
-      emailAddresses: emails
-    }
+      name: "",
+      email: "",
+      phoneNumber: "",
+      profileImageFile: undefined,
+      bio: "",
+      address: { street: "", city: "", country: "", zip: "" },
+    },
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log(data);
+  // Fetch single user
+  const { data: getSingleUser, isLoading, error } = useQuery({
+    queryKey: ["singleUser", userId],
+    queryFn: async (): Promise<ApiResponse> => {
+      if (!userId) throw new Error("User ID is required");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/getsingeuser/${userId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch user");
+      return res.json();
+    },
+    enabled: !!userId && status === "authenticated",
+  });
+
+  // Populate form when API returns data
+  useEffect(() => {
+    const userData = getSingleUser?.user;
+    if (userData) {
+      form.reset({
+        name: userData.name || "",
+        email: userData.email || "",
+        phoneNumber: userData.phoneNumber || "",
+        profileImageFile: undefined,
+        bio: userData.bio || "",
+        address: {
+          street: userData.address?.street || "",
+          city: userData.address?.city || "",
+          country: userData.address?.country || "",
+          zip: userData.address?.zip || "",
+        },
+      });
+
+      if (userData.profileImage) setImagePreview(userData.profileImage);
+    }
+  }, [getSingleUser, form]);
+
+  // Fallback to session
+  useEffect(() => {
+    if (user && status === "authenticated" && !getSingleUser && !isLoading) {
+      form.reset({
+        name: user.name || "",
+        email: user.email || "",
+        phoneNumber: user.phoneNumber || "",
+        profileImageFile: undefined,
+        bio: user.bio || "",
+        address: {
+          street: user.address?.street || "",
+          city: user.address?.city || "",
+          country: user.address?.country || "",
+          zip: user.address?.zip || "",
+        },
+      });
+
+      if (user.profileImage) setImagePreview(user.profileImage);
+    }
+  }, [user, status, getSingleUser, isLoading, form]);
+
+  // Handle profile image preview
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "profileImageFile" && value.profileImageFile instanceof File) {
+        const file = value.profileImageFile;
+        if (!file.type.startsWith("image/")) {
+          form.setError("profileImageFile", { type: "manual", message: "Invalid image file." });
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          form.setError("profileImageFile", { type: "manual", message: "Max size 5MB." });
+          return;
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => setImagePreview(reader.result as string);
+        reader.readAsDataURL(file);
+      } else if (!value.profileImageFile) {
+        setImagePreview(getSingleUser?.user?.profileImage || null);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, getSingleUser]);
+
+  // Mutation to update user
+  const updateUserMutation = useMutation<ApiResponse, Error, PersonalInfoFormValues>({
+    mutationFn: async (data) => {
+      if (!userId) throw new Error("User not authenticated");
+      const formData = new FormData();
+      formData.append("name", data.name.trim());
+      formData.append("email", data.email.toLowerCase().trim());
+      formData.append("phoneNumber", data.phoneNumber.trim());
+      formData.append("bio", data.bio || "");
+      formData.append("address[street]", data.address.street || "");
+      formData.append("address[city]", data.address.city || "");
+      formData.append("address[country]", data.address.country || "");
+      formData.append("address[zip]", data.address.zip || "");
+      if (data.profileImageFile) formData.append("image", data.profileImageFile);
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/updateuser/${userId}`,
+        { method: "PUT", body: formData }
+      );
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to update profile");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Profile updated successfully!");
+      queryClient.invalidateQueries({ queryKey: ["singleUser", userId] });
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to update profile");
+    },
+  });
+
+  const onSubmit = async (data: PersonalInfoFormValues) => {
+    await updateUserMutation.mutateAsync(data);
   };
 
-  const addEmailAddress = () => {
-    const newEmail = {
-      email: '',
-      isPrimary: false,
-      addedAt: 'Just now'
-    };
-    setEmails([...emails, newEmail]);
-  };
+  if (status === "loading" || (isLoading && !getSingleUser)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
+        <h2 className="text-2xl font-semibold mb-2">Authentication Required</h2>
+        <p className="mb-4">Please log in to update your profile.</p>
+        <Button onClick={() => (window.location.href = "/auth/signin")}>Go to Sign In</Button>
+      </div>
+    );
+  }
+
+  if (error && !getSingleUser) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
+        <h2 className="text-2xl font-semibold mb-2">Error Loading Profile</h2>
+        <p className="mb-4">{error.message}</p>
+        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["singleUser", userId] })}>Retry</Button>
+      </div>
+    );
+  }
+
+  const currentUser = getSingleUser?.user || user;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
-      {/* Header Section */}
-      <div className="relative mb-8">
-        <div className="h-20 bg-gradient-to-r from-blue-200 to-yellow-100 rounded-t-lg"></div>
-        <div className="flex items-center justify-between px-6 py-4 bg-white rounded-b-lg shadow-sm">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src="/api/placeholder/64/64" alt="Alexa Rawles" />
-                <AvatarFallback>AR</AvatarFallback>
-              </Avatar>
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Alexa Rawles</h2>
-              <p className="text-sm text-gray-500">alexarawles@gmail.com</p>
-            </div>
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-100 flex items-center gap-6">
+          <div className="relative w-20 h-20 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center overflow-hidden">
+            {imagePreview ? (
+              <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <div className="text-white text-2xl font-semibold">
+                {currentUser?.name?.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">✓</div>
           </div>
-          <Button variant="outline" className="bg-blue-500 text-white hover:bg-blue-600 border-blue-500">
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-1">Update Personal Details</h2>
+            <p className="text-gray-500 text-sm">Keep your profile information up to date</p>
+            {currentUser?.name && <p className="text-blue-600 text-sm font-medium">Welcome back, {currentUser.name}!</p>}
+          </div>
+        </div>
+
+        {/* Form */}
+        <div className="px-8 py-8">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Name & Email */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Full Name" disabled={updateUserMutation.isPending} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email*</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="Email" disabled={updateUserMutation.isPending} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Phone & Profile Image */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number*</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Phone Number" disabled={updateUserMutation.isPending} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="profileImageFile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Profile Image (Max 5MB)</FormLabel>
+                      <FormControl>
+                        <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files?.[0])} disabled={updateUserMutation.isPending} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Bio */}
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio ({(field.value || "").length}/200)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="About you" maxLength={200} disabled={updateUserMutation.isPending} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Address */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium border-b border-gray-200 pb-2">Address Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {["street", "city", "country", "zip"].map((fieldName) => (
+                    <FormField
+                      key={fieldName}
+                      control={form.control}
+                      name={`address.${fieldName}` as any}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}</FormLabel>
+                          <FormControl>
+                            <Input placeholder={fieldName} disabled={updateUserMutation.isPending} {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="pt-6 border-t border-gray-100">
+                <Button type="submit" disabled={updateUserMutation.isPending}>
+                  {updateUserMutation.isPending ? "Updating..." : "Update Profile"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
-
-      {/* Form Section */}
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Full Name */}
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Full Name</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Your First Name" 
-                      className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Nick Name */}
-            <FormField
-              control={form.control}
-              name="nickName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Nick Name</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Your First Name" 
-                      className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Gender */}
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Gender</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        <SelectValue placeholder="Your First Name" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Country */}
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Country</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        <SelectValue placeholder="Your First Name" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="us">United States</SelectItem>
-                      <SelectItem value="uk">United Kingdom</SelectItem>
-                      <SelectItem value="ca">Canada</SelectItem>
-                      <SelectItem value="au">Australia</SelectItem>
-                      <SelectItem value="de">Germany</SelectItem>
-                      <SelectItem value="fr">France</SelectItem>
-                      <SelectItem value="jp">Japan</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Language */}
-            <FormField
-              control={form.control}
-              name="language"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Language</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        <SelectValue placeholder="Your First Name" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
-                      <SelectItem value="it">Italian</SelectItem>
-                      <SelectItem value="pt">Portuguese</SelectItem>
-                      <SelectItem value="ru">Russian</SelectItem>
-                      <SelectItem value="ja">Japanese</SelectItem>
-                      <SelectItem value="ko">Korean</SelectItem>
-                      <SelectItem value="zh">Chinese</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Time Zone */}
-            <FormField
-              control={form.control}
-              name="timeZone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium text-gray-700">Time Zone</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="mt-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                        <SelectValue placeholder="Your First Name" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="UTC-12">(UTC-12:00) International Date Line West</SelectItem>
-                      <SelectItem value="UTC-11">(UTC-11:00) Coordinated Universal Time-11</SelectItem>
-                      <SelectItem value="UTC-10">(UTC-10:00) Hawaii</SelectItem>
-                      <SelectItem value="UTC-9">(UTC-09:00) Alaska</SelectItem>
-                      <SelectItem value="UTC-8">(UTC-08:00) Pacific Time (US & Canada)</SelectItem>
-                      <SelectItem value="UTC-7">(UTC-07:00) Mountain Time (US & Canada)</SelectItem>
-                      <SelectItem value="UTC-6">(UTC-06:00) Central Time (US & Canada)</SelectItem>
-                      <SelectItem value="UTC-5">(UTC-05:00) Eastern Time (US & Canada)</SelectItem>
-                      <SelectItem value="UTC-4">(UTC-04:00) Atlantic Time (Canada)</SelectItem>
-                      <SelectItem value="UTC+0">(UTC+00:00) Greenwich Mean Time</SelectItem>
-                      <SelectItem value="UTC+1">(UTC+01:00) Central European Time</SelectItem>
-                      <SelectItem value="UTC+2">(UTC+02:00) Eastern European Time</SelectItem>
-                      <SelectItem value="UTC+8">(UTC+08:00) China Standard Time</SelectItem>
-                      <SelectItem value="UTC+9">(UTC+09:00) Japan Standard Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Email Addresses Section */}
-          <div className="mt-8">
-            <Label className="text-sm font-medium text-gray-700 mb-4 block">My email Address</Label>
-            <div className="space-y-3">
-              {emails.map((emailObj, index) => (
-                <Card key={index} className="border border-gray-200">
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <Checkbox 
-                        checked={emailObj.isPrimary}
-                        className="text-blue-500 border-gray-300"
-                      />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{emailObj.email}</p>
-                        <p className="text-xs text-gray-500">{emailObj.addedAt}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={addEmailAddress}
-                className="text-blue-500 hover:text-blue-600 hover:bg-blue-50 p-0 h-auto font-normal"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Email Address
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
     </div>
   );
-}
+};
+
+export default PersonalInformation;
