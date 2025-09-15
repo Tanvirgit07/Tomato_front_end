@@ -32,7 +32,7 @@ const HomeHero = () => {
   }, []);
 
   return (
-    <section className="relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-screen overflow-hidden">
+    <section className="relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-[91vh] overflow-hidden">
       {slides.map((slide, index) => (
         <div
           key={index}

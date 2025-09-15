@@ -22,7 +22,9 @@ export default function RootLayout({
         <AuthProvider>
           <AppProvider>
             <Navbar />
-            {children}
+            <div className="mt-[88px]">
+              {children}
+            </div>
             <Footer />
             <Toaster richColors position="bottom-right" /> 
           </AppProvider>
