@@ -11,6 +11,9 @@ import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react"; // 👈 new import
+
 interface FormData {
   email: string;
   password: string;
@@ -19,6 +22,7 @@ interface FormData {
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // 👈 state for toggle
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -36,7 +40,6 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Sign In Data:", formData);
     try {
       setIsLoading(true);
 
@@ -103,6 +106,7 @@ const LoginForm = () => {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
               <div>
                 <Label htmlFor="email" className="text-base font-medium">
                   Email Address
@@ -119,22 +123,37 @@ const LoginForm = () => {
                 />
               </div>
 
+              {/* Password with eye toggle */}
               <div>
                 <Label htmlFor="password" className="text-base font-medium">
                   Password
                 </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  className="h-[51px] border border-[#272727] mt-2"
-                />
+                <div className="relative mt-2">
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                    className="h-[51px] border border-[#272727] pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </div>
 
+              {/* Remember + Forgot */}
               <div className="flex items-center justify-between mt-2 pb-7">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -161,6 +180,7 @@ const LoginForm = () => {
                 </button>
               </div>
 
+              {/* Submit */}
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -168,6 +188,14 @@ const LoginForm = () => {
               >
                 {isLoading ? "Sign In..." : "Sign in "}
               </Button>
+
+              {/* Sign up link */}
+              <p className="text-xs text-gray-500 mt-1 text-center">
+                Don’t have an account?{" "}
+                <Link href="/signup" className="text-red-600 hover:underline">
+                  Sign up
+                </Link>
+              </p>
             </form>
           </CardContent>
         </div>

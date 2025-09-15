@@ -9,6 +9,9 @@ import Image from "next/image";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react"; // 👈 eye icon যোগ করা হলো
+
 interface FormData {
   name: string;
   email: string;
@@ -27,7 +30,10 @@ const SignUpFrom: React.FC = () => {
     confirmPassword: "",
     termsAndCondition: false,
   });
-  
+
+  const [showPassword, setShowPassword] = useState(false); // 👈 Password toggle state
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const router = useRouter();
 
   const createUserMutation = useMutation({
@@ -52,13 +58,13 @@ const SignUpFrom: React.FC = () => {
       return res.json();
     },
     onSuccess: (data) => {
-      toast.success(data?.message)
+      toast.success(data?.message);
       router.push("/login");
-    }, 
+    },
 
     onError: (err) => {
-      toast.error(err.message)
-    }
+      toast.error(err.message);
+    },
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +83,7 @@ const SignUpFrom: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="h-screen mt-16 flex flex-col lg:flex-row">
       {/* Left - Image */}
       <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
         <Image
@@ -87,7 +93,7 @@ const SignUpFrom: React.FC = () => {
           className="object-cover"
         />
         <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute top-8 left-8 z-10">
+        <div className="absolute top-16 left-8 z-10">
           <div className="flex items-center space-x-2">
             <div className="h-[70px] w-[70px] flex items-center justify-center">
               <Image
@@ -118,10 +124,7 @@ const SignUpFrom: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <Label
-                htmlFor="name"
-                className="text-base font-medium leading-[120%]"
-              >
+              <Label htmlFor="name" className="text-base font-medium leading-[120%]">
                 Name
               </Label>
               <Input
@@ -137,10 +140,7 @@ const SignUpFrom: React.FC = () => {
             </div>
 
             <div>
-              <Label
-                htmlFor="email"
-                className="text-base font-medium leading-[120%]"
-              >
+              <Label htmlFor="email" className="text-base font-medium leading-[120%]">
                 Email Address
               </Label>
               <Input
@@ -156,10 +156,7 @@ const SignUpFrom: React.FC = () => {
             </div>
 
             <div>
-              <Label
-                htmlFor="phone"
-                className="text-base font-medium leading-[120%]"
-              >
+              <Label htmlFor="phone" className="text-base font-medium leading-[120%]">
                 Phone Number
               </Label>
               <Input
@@ -174,42 +171,56 @@ const SignUpFrom: React.FC = () => {
               />
             </div>
 
+            {/* Password */}
             <div>
-              <Label
-                htmlFor="password"
-                className="text-base font-medium leading-[120%]"
-              >
+              <Label htmlFor="password" className="text-base font-medium leading-[120%]">
                 Password
               </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="h-[51px] border border-[#272727] mt-2"
-                required
-              />
+              <div className="relative mt-2">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="h-[51px] border border-[#272727] pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
+            {/* Confirm Password */}
             <div>
-              <Label
-                htmlFor="confirmPassword"
-                className="text-base font-medium leading-[120%]"
-              >
+              <Label htmlFor="confirmPassword" className="text-base font-medium leading-[120%]">
                 Confirm Password
               </Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm password"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="h-[51px] border border-[#272727] mt-2"
-                required
-              />
+              <div className="relative mt-2">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className="h-[51px] border border-[#272727] pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -230,6 +241,12 @@ const SignUpFrom: React.FC = () => {
             >
               Signup
             </Button>
+            <p className="text-xs text-gray-500 mt-1 text-center">
+              Do you have an account?{" "}
+              <Link href="/login" className="text-red-600 hover:underline">
+                Sign In
+              </Link>
+            </p>
           </form>
         </div>
       </div>
