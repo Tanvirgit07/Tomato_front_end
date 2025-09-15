@@ -3,25 +3,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  User,
-  Lock,
-  Camera,
-  Edit3,
-  Mail,
-  Shield,
-  ChevronRight,
-} from "lucide-react";
+import { User, Lock, Camera, Edit3, Mail, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Profilepage() {
   const [isHovering, setIsHovering] = useState(false);
   const session = useSession();
   const user = session?.data?.user as any; // user info from API
-
-  console.log(session);
 
   const handlePersonalInfo = () => {
     console.log("Navigate to Personal Information");
@@ -36,21 +25,13 @@ export default function Profilepage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex items-center justify-center">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">My Account</h1>
-          <p className="text-gray-600 text-lg">
-            Manage your profile and account settings
-          </p>
-        </div>
-
         {/* Main Profile Card */}
         <div className="max-w-2xl mx-auto">
-          <Card className="">
+          <Card>
             <CardHeader className="relative overflow-hidden">
-              {/* Background Pattern */}
+              {/* Background */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
                 <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent"></div>
                 <div
@@ -63,7 +44,7 @@ export default function Profilepage() {
 
               {/* Profile Content */}
               <div className="relative z-10 text-center py-8">
-                {/* Avatar Section */}
+                {/* Avatar */}
                 <div className="relative inline-block">
                   <div
                     className="relative group cursor-pointer"
@@ -81,7 +62,6 @@ export default function Profilepage() {
                       </AvatarFallback>
                     </Avatar>
 
-                    {/* Camera Overlay */}
                     <div
                       className={`absolute inset-0 bg-black/50 rounded-full flex items-center justify-center transition-opacity duration-300 ${
                         isHovering ? "opacity-100" : "opacity-0"
@@ -90,7 +70,6 @@ export default function Profilepage() {
                       <Camera className="h-8 w-8 text-white" />
                     </div>
 
-                    {/* Edit Button */}
                     <Button
                       size="sm"
                       className="absolute -bottom-2 -right-2 h-10 w-10 rounded-full bg-white text-gray-700 hover:bg-gray-100 shadow-lg border-2 border-white"
@@ -103,18 +82,20 @@ export default function Profilepage() {
                 {/* User Info */}
                 <div className="mt-6 text-white">
                   <h2 className="text-2xl font-bold mb-2">{user?.name}</h2>
-
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <Mail className="h-4 w-4 text-gray-300" />
-                    <p className="text-gray-200">{user?.email} ({user?.role})</p>
+                    <p className="text-gray-200">
+                      {user?.email} ({user?.role})
+                    </p>
                   </div>
                 </div>
               </div>
             </CardHeader>
 
-            <CardContent className="p-8">
+            <CardContent className="">
               {/* Action Buttons */}
               <div className="space-y-4">
+                {/* Existing Buttons */}
                 <div>
                   <Link href="/account/personalInfo">
                     <Button
@@ -130,9 +111,6 @@ export default function Profilepage() {
                           <div className="text-left">
                             <p className="font-semibold text-lg">
                               Personal Information
-                            </p>
-                            <p className="text-sm text-blue-100">
-                              Update your profile details
                             </p>
                           </div>
                         </div>
@@ -158,15 +136,79 @@ export default function Profilepage() {
                             <p className="font-semibold text-lg">
                               Change Password
                             </p>
-                            <p className="text-sm text-purple-100">
-                              Update your security settings
-                            </p>
                           </div>
                         </div>
                         <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
                       </div>
                     </Button>
                   </Link>
+                </div>
+
+                {/* New Buttons */}
+                <div>
+                  <Link href="/login">
+                    <Button
+                      className="w-full h-16 cursor-pointer bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                      size="lg"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-white/20 rounded-lg">
+                            <User className="h-6 w-6" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-lg">Login</p>
+                          </div>
+                        </div>
+                        <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="flex gap-4">
+                  {/* Register Button */}
+                  <div className="flex-1">
+                    <Link href="/register">
+                      <Button
+                        className="w-full h-16 cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        size="lg"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white/20 rounded-lg">
+                              <User className="h-6 w-6" />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-semibold text-lg">Register</p>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* Logout Button */}
+                  <div className="flex-1">
+                    <Button
+                      onClick={() => signOut()}
+                      className="w-full h-16 cursor-pointer bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                      size="lg"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-white/20 rounded-lg">
+                            <Lock className="h-6 w-6" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-lg">Logout</p>
+                          </div>
+                        </div>
+                        <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
