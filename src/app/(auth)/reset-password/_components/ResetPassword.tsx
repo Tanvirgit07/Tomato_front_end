@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff} from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
-// import restePassImage from "@/Public/images/resetPass.svg";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface PasswordState {
   newPassword: string;
@@ -36,7 +38,19 @@ const ResetPassword = () => {
 
   const [errors, setErrors] = useState<ErrorState>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [resetToken, setResetToken] = useState<string>("");
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Get email from URL
+  const email = searchParams.get("email") || "";
+
+  // Load resetToken from localStorage on mount
+  useEffect(() => {
+    const token = localStorage.getItem("refreshToken"); // or wherever you stored it
+    if (token) setResetToken(token);
+  }, []);
 
   const handleInputChange = (field: keyof PasswordState, value: string) => {
     setPasswords((prev) => ({ ...prev, [field]: value }));
@@ -49,10 +63,13 @@ const ResetPassword = () => {
 
   const validateForm = () => {
     const newErrors: ErrorState = {};
-    if (!passwords.newPassword) newErrors.newPassword = "New password is required";
-    else if (passwords.newPassword.length < 8) newErrors.newPassword = "Password must be at least 8 characters";
+    if (!passwords.newPassword)
+      newErrors.newPassword = "New password is required";
+    else if (passwords.newPassword.length < 8)
+      newErrors.newPassword = "Password must be at least 8 characters";
 
-    if (!passwords.confirmPassword) newErrors.confirmPassword = "Please confirm your password";
+    if (!passwords.confirmPassword)
+      newErrors.confirmPassword = "Please confirm your password";
     else if (passwords.newPassword !== passwords.confirmPassword)
       newErrors.confirmPassword = "Passwords do not match";
 
@@ -60,43 +77,89 @@ const ResetPassword = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Password reset successful", passwords);
-    setIsLoading(false);
-  };
+  const restPasswordMutation = useMutation({
+    mutationFn: async (bodyData: {
+      email: string;
+      newPassword: string;
+      resetToken: string;
+    }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/resetpassword`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        }
+      );
 
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.message || "Password reset failed");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Password reset successful");
+      router.push("/login");
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to reset password");
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    if (!resetToken) {
+      toast.error("Reset token not found");
+      return;
+    }
+
+    setIsLoading(true);
+
+    restPasswordMutation.mutate(
+      {
+        email,
+        newPassword: passwords.newPassword,
+        resetToken,
+      },
+      {
+        onSettled: () => setIsLoading(false), // set loading false after mutation finishes
+      }
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       {/* Left - Image */}
-     <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
-                   <Image
-                     src="/images/signupImage.jpg"
-                     alt="Sign Up Illustration"
-                     fill
-                     className="object-cover"
-                   />
-                   <div className="absolute inset-0 bg-black/30" />
-                   <div className="absolute top-8 left-8 z-10">
-                     <div className="flex items-center space-x-2">
-                       <div className="h-[70px] w-[70px] flex items-center justify-center">
-                         <Image
-                           src="/images/source.gif"
-                           width={200}
-                           height={200}
-                           className="object-cover"
-                           alt="logo image"
-                         />
-                       </div>
-                       <span className="text-2xl font-bold text-white">
-                         T<span className="text-red-400">O</span>MAT<span className="text-red-400">O</span>
-                       </span>
-                     </div>
-                   </div>
-                 </div>
+      <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
+        <Image
+          src="/images/signupImage.jpg"
+          alt="Sign Up Illustration"
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute top-8 left-8 z-10">
+          <div className="flex items-center space-x-2">
+            <div className="h-[70px] w-[70px] flex items-center justify-center">
+              <Image
+                src="/images/source.gif"
+                width={200}
+                height={200}
+                className="object-cover"
+                alt="logo image"
+              />
+            </div>
+            <span className="text-2xl font-bold text-white">
+              T<span className="text-red-400">O</span>MAT
+              <span className="text-red-400">O</span>
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Right - Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-start p-6 lg:p-12">
@@ -128,7 +191,9 @@ const ResetPassword = () => {
                 {showPassword.newPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {errors.newPassword && <p className="text-sm text-red-600 mt-1">{errors.newPassword}</p>}
+            {errors.newPassword && (
+              <p className="text-sm text-red-600 mt-1">{errors.newPassword}</p>
+            )}
           </div>
 
           {/* Confirm Password */}
@@ -162,31 +227,9 @@ const ResetPassword = () => {
           <Button
             onClick={handleSubmit}
             className="w-full h-[51px] text-base bg-[#EF1A26] hover:bg-[#d84a52] text-white font-medium rounded-md transition disabled:opacity-60"
+            disabled={isLoading}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none">
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    className="opacity-25"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 
-                    5.291A7.962 7.962 0 014 12H0c0 
-                    3.042 1.135 5.824 3 7.938l3-2.647z"
-                    className="opacity-75"
-                  />
-                </svg>
-                <span>Updating...</span>
-              </div>
-            ) : (
-              "Continue"
-            )}
+            {isLoading ? "Updating..." : "Continue"}
           </Button>
         </div>
       </div>

@@ -4,11 +4,17 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-// import OtpImage from "@/Public/images/otpImage.svg";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const OTPForm: React.FC = () => {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+  console.log("email", email);
+  const router = useRouter();
 
   useEffect(() => {
     // Focus first input on mount
@@ -37,6 +43,37 @@ const OTPForm: React.FC = () => {
     }
   };
 
+  const otpMutation = useMutation({
+    mutationFn: async (bodyData: { email: string; otp: string }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/verifyotp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.message || "OTP verification failed");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "OTP verified successfully");
+      console.log(data?.resetToken);
+      localStorage.setItem("refreshToken", data?.resetToken);
+      router.push(`/reset-password?email=${email}`);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Invalid OTP, try again");
+    },
+  });
+
   const handleVerify = async () => {
     const otpString = otp.join("");
     if (otpString.length !== 6) return;
@@ -45,6 +82,7 @@ const OTPForm: React.FC = () => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     console.log("OTP Verified:", otpString);
+    otpMutation.mutate({ email, otp: otpString });
   };
 
   return (

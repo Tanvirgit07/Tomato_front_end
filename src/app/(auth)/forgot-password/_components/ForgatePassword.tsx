@@ -6,17 +6,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail } from "lucide-react";
 import Image from "next/image";
-// import ForgetImage from "@/Public/images/frogetPass.svg";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const ForgatePassword = () => {
   const [email, setEmail] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const router = useRouter();
+  const encodedEmail = encodeURIComponent(email);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  const forgotPassMutation = useMutation({
+    mutationFn: async (bodyData: { email: string }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/forgotpassword`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData), // email object পাঠানো হচ্ছে
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to send email");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      router.push(`/otp?email=${encodedEmail}`);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   const handleSubmit = async (): Promise<void> => {
     if (!email) {
@@ -37,6 +70,7 @@ const ForgatePassword = () => {
 
     setIsLoading(false);
     console.log("Password reset email sent to:", email);
+    forgotPassMutation.mutate({ email: email });
   };
 
   const handleInputChange = (value: string): void => {

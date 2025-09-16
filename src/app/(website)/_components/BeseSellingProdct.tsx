@@ -1,7 +1,12 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
-import { Star } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { Heart, Minus, Plus } from "lucide-react";
+
 import {
   Carousel,
   CarouselContent,
@@ -9,238 +14,325 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Image from "next/image";
 
-const products = [
-  {
-    id: 1,
-    name: "Silk Sculpt Serum",
-    category: "Skin Care",
-    description: "A luxurious serum for hydrated and glowing skin.",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
-    originalPrice: 60.0,
-    discountedPrice: 25.0,
-    discountPercentage: 50,
-    rating: 5.0,
-  },
-  {
-    id: 2,
-    name: "Glow Essence Oil",
-    category: "Skin Care",
-    description: "A nourishing oil with natural ingredients.",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
-    originalPrice: 60.0,
-    discountedPrice: 35.0,
-    discountPercentage: 30,
-    rating: 5.0,
-  },
-  {
-    id: 3,
-    name: "Radiance Drop Serum",
-    category: "Skin Care",
-    description: "An advanced serum for radiant skin.",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
-    originalPrice: 73.0,
-    discountedPrice: 40.0,
-    discountPercentage: 40,
-    rating: 5.0,
-  },
-  {
-    id: 4,
-    name: "Velvet Moisturizer",
-    category: "Make Up",
-    description: "A silky moisturizer for flawless makeup base.",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
-    originalPrice: 45.0,
-    discountedPrice: 22.5,
-    discountPercentage: 50,
-    rating: 4.8,
-  },
-  {
-    id: 5,
-    name: "Aroma Bliss Perfume",
-    category: "Fragrances",
-    description: "A long-lasting floral fragrance.",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=300&fit=crop",
-    originalPrice: 80.0,
-    discountedPrice: 40.0,
-    discountPercentage: 50,
-    rating: 4.9,
-  },
-];
+// 🟢 Autoplay plugin import
+import Autoplay from "embla-carousel-autoplay";
 
-const BestSellingProduct = () => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 5,
-    hours: 12,
-    minutes: 30,
-    seconds: 24,
-  });
+const renderStars = (rating: number) => {
+  const stars = [];
+  for (let i = 0; i < 5; i++) {
+    stars.push(
+      <span key={i} className={i < rating ? "text-amber-500" : "text-gray-300"}>
+        ★
+      </span>
+    );
+  }
+  return <div className="flex">{stars}</div>;
+};
+
+export default function BestSellingProduct() {
   const [isVisible, setIsVisible] = useState(false);
+  const session = useSession();
+  const user = session?.data?.user as any;
+  const userId = user?.id;
+  const queryClient = useQueryClient();
+
+  // ✅ Fetch Best Selling Products
+  const {
+    data: products,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["best-product"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/bestsell/bestsellproduct`
+      );
+      if (!res.ok) throw new Error("Failed to fetch best-selling products");
+      return res.json();
+    },
+  });
+
+  // ✅ Fetch Cart
+  const { data: cartData } = useQuery({
+    queryKey: ["cart", userId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/cartuser/${userId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      return res.json();
+    },
+    enabled: !!userId,
+  });
+
+  // ✅ Fetch Wishlist
+  const { data: wishlistData } = useQuery({
+    queryKey: ["wishlist", userId],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/wishlist/getwishlist/${userId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch wishlist");
+      return res.json();
+    },
+    enabled: !!userId,
+  });
+  const wishlist = wishlistData?.data || [];
+
+  // ✅ Add to Cart
+  const addToCartMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/addtocart/${userId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to add to cart");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message);
+      queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+    },
+    onError: (error: any) => toast.error(error.message),
+  });
+
+  // ✅ Update Cart Quantity
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({
+      productId,
+      action,
+    }: {
+      productId: string;
+      action: "increment" | "decrement";
+    }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/update/${userId}/${productId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to update quantity");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message);
+      queryClient.invalidateQueries({ queryKey: ["cart", userId] });
+    },
+    onError: (error: any) => toast.error(error.message),
+  });
+
+  // ✅ Add to Wishlist
+  const addToWishlistMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/wishlist/addwishlist/${userId}/${productId}`,
+        { method: "POST", headers: { "Content-Type": "application/json" } }
+      );
+      if (!res.ok) throw new Error("Failed to add to wishlist");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message);
+      queryClient.invalidateQueries({ queryKey: ["wishlist", userId] });
+    },
+    onError: (error: any) => toast.error(error.message),
+  });
 
   useEffect(() => {
     setIsVisible(true);
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        let { days, hours, minutes, seconds } = prev;
-        seconds -= 1;
-        if (seconds < 0) {
-          seconds = 59;
-          minutes -= 1;
-        }
-        if (minutes < 0) {
-          minutes = 59;
-          hours -= 1;
-        }
-        if (hours < 0) {
-          hours = 23;
-          days -= 1;
-        }
-        if (days < 0) {
-          return { days: 0, hours: 0, minutes: 0, seconds: 0 };
-        }
-        return { days, hours, minutes, seconds };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
   }, []);
 
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const halfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - Math.ceil(rating);
-
+  if (isLoading)
     return (
-      <div className="flex items-center text-yellow-400">
-        {Array(fullStars)
-          .fill(0)
-          .map((_, i) => (
-            <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-          ))}
-        {halfStar && (
-          <Star
-            key="half"
-            className="w-4 h-4 sm:w-5 sm:h-5 fill-current opacity-50"
-          />
-        )}
-        {Array(emptyStars)
-          .fill(0)
-          .map((_, i) => (
-            <Star
-              key={`empty-${i}`}
-              className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300"
-            />
-          ))}
+      <div className="flex justify-center items-center h-64 text-lg font-semibold">
+        Loading products...
       </div>
     );
-  };
+  if (isError)
+    return (
+      <div className="flex justify-center items-center h-64 text-lg font-semibold text-red-500">
+        Failed to load best-selling products.
+      </div>
+    );
 
   return (
-    <section className="">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 px-4 py-2 rounded-full mb-4">
-            <span className="text-indigo-600 font-medium text-sm">Our Products</span>
-          </div>
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
-            Best Selling Products
-          </h2>
-          <p className="text-slate-600 max-w-2xl mx-auto">
-            Discover our latest premium products crafted with the finest ingredients for your beauty needs
+    <section className="py-8 sm:py-12 lg:py-16 container mx-auto">
+      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 sm:mb-12 text-center tracking-tight">
+        Best Selling Products
+      </h2>
+
+      {products?.data?.length === 0 ? (
+        <div className="flex justify-center items-center h-64 bg-gray-100 rounded-2xl shadow-lg">
+          <p className="text-gray-500 text-lg sm:text-xl font-semibold">
+            No Products Found 😔
           </p>
         </div>
+      ) : (
         <Carousel
-          opts={{
-            align: "start",
-            loop: true,
-          }}
+          opts={{ align: "start", loop: true }}
+          plugins={[
+            Autoplay({ delay: 3000, stopOnInteraction: true }) // 🟢 autoplay plugin
+          ]}
           className="w-full"
         >
           <CarouselContent className="-ml-3 sm:-ml-4">
-            {products.map((product, index) => (
-              <CarouselItem
-                key={product.id}
-                className="pl-3 sm:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 bg-white"
-              >
-                <div
-                  className={`rounded-2xl overflow-hidden transform transition-all hover:border duration-500 group  hover:-translate-y-1 h-[400px] sm:h-[440px] lg:h-[480px] flex flex-col justify-between ${
-                    isVisible
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-4"
-                  }`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                >
-                  {/* Image */}
-                  <div className="relative w-full h-48 sm:h-56 lg:h-64 flex-shrink-0 overflow-hidden">
-                    <Image
-                    width={400}
-                    height={400}
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute top-3 left-3 bg-gradient-to-r from-orange-500 to-red-600 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                      {product.discountPercentage}% OFF
-                    </div>
-                    <div className="absolute bottom-3 left-3 bg-gray-900 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1">
-                      <span>{String(timeLeft.days).padStart(2, "0")}d</span>:
-                      <span>{String(timeLeft.hours).padStart(2, "0")}h</span>:
-                      <span>{String(timeLeft.minutes).padStart(2, "0")}m</span>:
-                      <span>{String(timeLeft.seconds).padStart(2, "0")}s</span>
-                    </div>
-                  </div>
+            {products?.data?.map((product: any, index: number) => {
+              const cartItem = cartData?.data?.find(
+                (item: any) => item.productId._id === product._id
+              );
+              const isWishlisted = wishlist.some(
+                (item: any) => item.productId._id === product._id
+              );
 
-                  {/* Content */}
-                  <div className="p-4 sm:p-5 flex flex-col justify-between flex-grow">
-                    <div>
-                      <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-800 line-clamp-2 leading-tight">
-                        {product.name}
-                      </h3>
-                      <div className="flex items-center mt-2 gap-2">
-                        {renderStars(product.rating)}
-                        <span className="text-yellow-400 text-xs sm:text-sm font-medium">
-                          {product.rating.toFixed(1)}
-                        </span>
+              return (
+                <CarouselItem
+                  key={product._id}
+                  className="pl-3 sm:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
+                >
+                  {/* 🟢 Product Card (unchanged) */}
+                  <div
+                    className={`group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-slate-100 ${
+                      isVisible
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-4"
+                    }`}
+                    style={{ transitionDelay: `${index * 100}ms` }}
+                  >
+                    {/* Product Image */}
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+
+                      {/* Category badge */}
+                      <div className="absolute top-4 right-4 z-10">
+                        <div className="bg-white/90 backdrop-blur-sm text-slate-700 px-3 py-1 rounded-full text-xs font-medium">
+                          {product.category?.name}
+                        </div>
                       </div>
-                      <p className="text-gray-600 text-sm sm:text-base mt-2 line-clamp-3 leading-relaxed">
-                        {product.description}
-                      </p>
+
+                      {/* Wishlist Heart */}
+                      <div
+                        className={`absolute top-4 left-4 z-10 flex items-center justify-center h-10 w-10 rounded-full cursor-pointer shadow-md transition-all duration-300 ${
+                          isWishlisted
+                            ? "bg-red-100 hover:bg-red-200"
+                            : "bg-white hover:bg-red-50"
+                        }`}
+                        onClick={() => {
+                          if (!isWishlisted) {
+                            addToWishlistMutation.mutate(product._id);
+                          } else {
+                            toast.info("Product already in wishlist");
+                          }
+                        }}
+                      >
+                        <Heart
+                          size={22}
+                          className={`transition-all duration-300 ${
+                            isWishlisted
+                              ? "text-red-500 fill-red-500 scale-110"
+                              : "text-red-500 hover:scale-110"
+                          }`}
+                        />
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-orange-600 font-bold text-base sm:text-lg lg:text-xl">
-                          ${product.discountedPrice.toFixed(2)}
-                        </span>
-                        <span className="text-gray-400 line-through text-xs sm:text-sm">
-                          ${product.originalPrice.toFixed(2)}
+
+                    {/* Content */}
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                          {product.name}
+                        </h3>
+                        <p
+                          className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: product.description,
+                          }}
+                        />
+                      </div>
+
+                      {/* Rating */}
+                      <div className="flex items-center gap-3">
+                        {renderStars(4)}
+                        <span className="text-amber-600 font-semibold text-sm">
+                          4.0
                         </span>
                       </div>
-                      <button className="bg-gradient-to-r from-orange-500 to-red-400 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium hover:from-orange-600 hover:to-red-400 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
-                        Add to Cart
-                      </button>
+
+                      {/* Price + Cart */}
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                              ${product.discountPrice?.toFixed(2)}
+                            </span>
+                            <span className="text-slate-400 line-through text-sm">
+                              ${product.price?.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="text-green-600 text-xs font-medium">
+                            Save $
+                            {(product.price - product.discountPrice).toFixed(2)}
+                          </div>
+                        </div>
+
+                        {/* Cart Controls */}
+                        {cartItem ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                updateQuantityMutation.mutate({
+                                  productId: product._id,
+                                  action: "decrement",
+                                })
+                              }
+                              className="bg-red-500 text-white px-3 py-1 rounded"
+                            >
+                              <Minus size={16} />
+                            </button>
+                            <span>{cartItem.quantity}</span>
+                            <button
+                              onClick={() =>
+                                updateQuantityMutation.mutate({
+                                  productId: product._id,
+                                  action: "increment",
+                                })
+                              }
+                              className="bg-green-500 text-white px-3 py-1 rounded"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => addToCartMutation.mutate(product._id)}
+                            className="bg-gradient-to-r from-orange-500 to-red-400 text-white px-4 py-2 rounded-2xl text-sm font-medium"
+                          >
+                            Add to Cart
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CarouselItem>
-            ))}
+                </CarouselItem>
+              );
+            })}
           </CarouselContent>
+
+          {/* Navigation Arrows */}
           <CarouselPrevious className="absolute -left-6 sm:-left-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2" />
           <CarouselNext className="absolute -right-6 sm:-right-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2" />
         </Carousel>
-        <div className="mt-8 sm:mt-10  lg:pt-16 pb-10 text-center">
-          <button className="bg-gradient-to-r from-orange-500 to-red-400 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
-            View All Products
-          </button>
-        </div>
-      </div>
+      )}
     </section>
   );
-};
-
-export default BestSellingProduct;
+}
