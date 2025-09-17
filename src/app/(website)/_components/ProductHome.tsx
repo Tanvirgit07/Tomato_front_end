@@ -5,7 +5,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ApiResponse, Product } from "../../../../types/product";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Heart, Minus, Plus } from "lucide-react";
