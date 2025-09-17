@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
@@ -169,7 +170,7 @@ export default function BestSellingProduct() {
       </h2>
 
       {products?.data?.length === 0 ? (
-        <div className="flex justify-center items-center h-64 bg-gray-100 rounded-2xl shadow-lg">
+        <div className="flex justify-center items-center h-64 rounded-2xl shadow-lg">
           <p className="text-gray-500 text-lg sm:text-xl font-semibold">
             No Products Found 😔
           </p>
@@ -198,7 +199,7 @@ export default function BestSellingProduct() {
                 >
                   {/* 🟢 Product Card (unchanged) */}
                   <div
-                    className={`group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-slate-100 ${
+                    className={`group relative rounded-3xl  transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-slate-100 ${
                       isVisible
                         ? "opacity-100 translate-y-0"
                         : "opacity-0 translate-y-4"
