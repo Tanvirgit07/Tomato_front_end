@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import {
 import { Category } from "../../../../../types/category";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function AllProducts() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -132,7 +134,7 @@ export default function AllProducts() {
     },
   });
   const wishlist = wishlistData?.data || [];
-  console.log("wishlist", wishlist)
+  console.log("wishlist", wishlist);
 
   // add to wishlist
   const addToWishlistMutation = useMutation({
@@ -233,7 +235,9 @@ export default function AllProducts() {
                   `}
                   onClick={() => {
                     if (
-                      !wishlist.some((item: any) => item.productId._id === p._id)
+                      !wishlist.some(
+                        (item: any) => item.productId._id === p._id
+                      )
                     ) {
                       addToWishlistMutation.mutate(p._id);
                     } else {
@@ -246,7 +250,9 @@ export default function AllProducts() {
                     className={`
                       transition-all duration-300
                       ${
-                        wishlist.some((item: any) => item.productId._id === p._id)
+                        wishlist.some(
+                          (item: any) => item.productId._id === p._id
+                        )
                           ? "text-red-500 fill-red-500 scale-110"
                           : "text-red-500 hover:scale-110"
                       }
@@ -256,13 +262,15 @@ export default function AllProducts() {
 
                 {/* Image */}
                 <div className="relative overflow-hidden">
-                  <Image
-                    width={400}
-                    height={400}
-                    src={p.image}
-                    alt={p.name}
-                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
+                  <Link href={`/products/${p._id}`}>
+                    <Image
+                      width={400}
+                      height={400}
+                      src={p.image}
+                      alt={p.name}
+                      className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                    />
+                  </Link>
                 </div>
 
                 {/* Content */}
