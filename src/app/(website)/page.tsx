@@ -9,6 +9,7 @@ import BrandSection from './_components/BrandSection'
 import BlogSection from './_components/BlogSection'
 import CTASection from './_components/CTASection'
 import ContactUs from './_components/ContactUs'
+import BecomeSellerSection from './_components/BecomeSeller'
 
 function page() {
   return (
@@ -19,6 +20,7 @@ function page() {
         <NewArrivals />
         <OfferCard />
         <CustomarReview />
+        <BecomeSellerSection />
         <BrandSection />
         <ContactUs />
         <CTASection />

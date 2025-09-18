@@ -119,7 +119,8 @@ const Navbar = () => {
     { label: "Home", href: "/" },
     { label: "Products", href: "/products" },
     { label: "About Us", href: "/about-us" },
-    { label: "Blog & Expert Tips", href: "/blog" },
+    { label: "Blogs", href: "/blog" },
+    { label: "Become a Seller", href: "/become-seller" }
   ];
 
   const handleSearch = (e: React.FormEvent): void => {
