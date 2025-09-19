@@ -15,7 +15,6 @@ import { Eye, EyeOff } from "lucide-react"; // 👈 eye icon যোগ করা
 interface FormData {
   name: string;
   email: string;
-  phoneNumber: string;
   password: string;
   confirmPassword: string;
   termsAndCondition: boolean;
@@ -25,13 +24,12 @@ const SignUpFrom: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
-    phoneNumber: "",
     password: "",
     confirmPassword: "",
     termsAndCondition: false,
   });
 
-  const [showPassword, setShowPassword] = useState(false); // 👈 Password toggle state
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const router = useRouter();
@@ -154,23 +152,6 @@ const SignUpFrom: React.FC = () => {
                 required
               />
             </div>
-
-            <div>
-              <Label htmlFor="phone" className="text-base font-medium leading-[120%]">
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                name="phoneNumber"
-                type="tel"
-                placeholder="Enter your phone number"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                className="h-[51px] border border-[#272727] mt-2"
-                required
-              />
-            </div>
-
             {/* Password */}
             <div>
               <Label htmlFor="password" className="text-base font-medium leading-[120%]">
