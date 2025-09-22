@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextAuthOptions } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -7,7 +6,18 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
+  },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token-website", // 🔹 আলাদা কুকি নাম
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
   providers: [
     CredentialsProvider({
@@ -37,14 +47,10 @@ export const authOptions: NextAuthOptions = {
           const response = await res.json();
           console.log("🔎 API Response:", response);
 
-          // ❌ আগে ছিল: response?.status
-          // ✅ ঠিক হবে: response?.success
           if (!res.ok || !response?.success) {
             throw new Error(response?.message || "Login failed");
           }
 
-          // ❌ আগে ছিল: const { user, accessToken } = response.data;
-          // ✅ ঠিক হবে:
           const { id, name, role, email, phonNumber } = response.data;
           const accessToken = response.accessToken;
 
@@ -53,7 +59,7 @@ export const authOptions: NextAuthOptions = {
             name,
             email,
             role,
-            phoneNumber: phonNumber, // backend spelling অনুযায়ী phonNumber
+            phoneNumber: phonNumber,
             accessToken,
           };
         } catch (error) {
