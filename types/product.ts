@@ -18,8 +18,9 @@ export interface Product {
   publicId: string;
   category: Category;
   subCategory: SubCategory;
-  reviews: any[];
-  comments: any[];
+  status: string,
+  // reviews: any[];
+  // comments: any[];
   createdAt: string;
   updatedAt: string;
   __v: number;

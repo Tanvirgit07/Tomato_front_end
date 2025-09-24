@@ -24,7 +24,7 @@ interface Offer {
   products: Product[];
 }
 
-export default function SimpleOfferGallery() {
+export default function OfferPage() {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [showAll, setShowAll] = useState<boolean>(false);
 
@@ -61,7 +61,7 @@ export default function SimpleOfferGallery() {
     ) || [];
 
   // Jodi showAll false hoy, sudhu 6 ta dakhabe
-  const displayedProducts = showAll ? allProducts : allProducts.slice(0, 8);
+  const displayedProducts = showAll ? allProducts : allProducts
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 py-16">
@@ -170,8 +170,7 @@ export default function SimpleOfferGallery() {
               ))}
         </div>
 
-        {/* See More Button */}
-        {allProducts.length > 6 && (
+        {/* {allProducts.length > 6 && (
           <div className="text-center mt-12">
             <button
               onClick={() => setShowAll((prev) => !prev)}
@@ -180,7 +179,7 @@ export default function SimpleOfferGallery() {
               {showAll ? "See Less" : "See More"}
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </section>
   );

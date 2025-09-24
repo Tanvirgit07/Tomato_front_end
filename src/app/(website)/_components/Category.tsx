@@ -12,15 +12,12 @@ import ProductHome from "./ProductHome";
 import { useQuery } from "@tanstack/react-query";
 import { categoyMap } from "../../../../types";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Category = () => {
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const {
-    data: mainCategory,
-    isLoading,
-    isError,
-  } = useQuery({
+  const { data: mainCategory, isLoading } = useQuery({
     queryKey: ["category"],
     queryFn: async () => {
       const res = await fetch(
@@ -33,9 +30,7 @@ const Category = () => {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch Data");
-      }
+      if (!res.ok) throw new Error("Failed to fetch Data");
       return res.json();
     },
   });
@@ -45,10 +40,6 @@ const Category = () => {
   const handleCategoryClick = (categoryName: string) => {
     setActiveCategory(categoryName);
   };
-
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error</p>;
-  if (categories.length === 0) return <p>No category found</p>;
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -67,13 +58,7 @@ const Category = () => {
 
         {/* Categories Carousel */}
         <div className="relative">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
+          <Carousel opts={{ align: "start", loop: true }} className="w-full">
             <CarouselContent className="-ml-2 sm:-ml-3">
               {/* All Category */}
               <CarouselItem className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7">
@@ -83,62 +68,86 @@ const Category = () => {
                     activeCategory === "All" ? "scale-105" : "hover:scale-105"
                   }`}
                 >
-                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-md group-hover:ring-2 group-hover:ring-orange-200 flex items-center justify-center bg-orange-100">
-                    <span className="text-xl font-bold text-orange-500">All</span>
-                  </div>
-                  <h3
-                    className={`text-xs sm:text-sm lg:text-base font-semibold text-center transition-colors duration-300 ${
-                      activeCategory === "All"
-                        ? "text-orange-600"
-                        : "text-gray-800 group-hover:text-orange-600"
-                    }`}
-                  >
-                    All
-                  </h3>
-                </div>
-              </CarouselItem>
-
-              {/* Map other categories */}
-              {categories.map((category: categoyMap) => (
-                <CarouselItem
-                  key={category._id}
-                  className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7"
-                >
-                  <div
-                    onClick={() => handleCategoryClick(category.categoryName)}
-                    className={`flex flex-col items-center cursor-pointer group transition-transform duration-300 p-2 sm:p-3 rounded-xl ${
-                      activeCategory === category.categoryName
-                        ? "scale-105"
-                        : "hover:scale-105"
-                    }`}
-                  >
-                    <div
-                      className={`relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 ${
-                        activeCategory === category.categoryName
-                          ? "ring-4 ring-orange-400 shadow-lg"
-                          : "group-hover:shadow-md group-hover:ring-2 group-hover:ring-orange-200"
-                      }`}
-                    >
-                      <Image
-                        width={200}
-                        height={200}
-                        src={category.image}
-                        alt={category.categoryName}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
+                  {/* Skeleton or actual content */}
+                  {isLoading ? (
+                    <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full bg-gray-300" />
+                  ) : (
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:ring-2 group-hover:ring-orange-200 flex items-center justify-center bg-orange-100">
+                      <span className="text-xl font-bold text-orange-500">All</span>
                     </div>
+                  )}
+
+                  {isLoading ? (
+                    <Skeleton className="w-12 h-4 sm:w-14 sm:h-5 rounded-md bg-gray-300" />
+                  ) : (
                     <h3
                       className={`text-xs sm:text-sm lg:text-base font-semibold text-center transition-colors duration-300 ${
-                        activeCategory === category.categoryName
+                        activeCategory === "All"
                           ? "text-orange-600"
                           : "text-gray-800 group-hover:text-orange-600"
                       }`}
                     >
-                      {category.categoryName}
+                      All
                     </h3>
-                  </div>
-                </CarouselItem>
-              ))}
+                  )}
+                </div>
+              </CarouselItem>
+
+              {/* Map other categories */}
+              {isLoading
+                ? Array.from({ length: 6 }).map((_, idx) => (
+                    <CarouselItem
+                      key={idx}
+                      className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7"
+                    >
+                      <div className="flex flex-col items-center p-2 sm:p-3">
+                        <Skeleton className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full bg-gray-300" />
+                        <Skeleton className="w-12 h-4 sm:w-14 sm:h-5 rounded-md bg-gray-300" />
+                      </div>
+                    </CarouselItem>
+                  ))
+                : categories.map((category: categoyMap) => (
+                    <CarouselItem
+                      key={category._id}
+                      className="pl-2 sm:pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 xl:basis-1/6 2xl:basis-1/7"
+                    >
+                      <div
+                        onClick={() =>
+                          handleCategoryClick(category.categoryName)
+                        }
+                        className={`flex flex-col items-center cursor-pointer group transition-transform duration-300 p-2 sm:p-3 rounded-xl ${
+                          activeCategory === category.categoryName
+                            ? "scale-105"
+                            : "hover:scale-105"
+                        }`}
+                      >
+                        <div
+                          className={`relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 xl:w-28 xl:h-28 mb-3 rounded-full overflow-hidden transition-all duration-300 ${
+                            activeCategory === category.categoryName
+                              ? "ring-4 ring-orange-400 shadow-lg"
+                              : "group-hover:shadow-md group-hover:ring-2 group-hover:ring-orange-200"
+                          }`}
+                        >
+                          <Image
+                            width={200}
+                            height={200}
+                            src={category.image}
+                            alt={category.categoryName}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                        </div>
+                        <h3
+                          className={`text-xs sm:text-sm lg:text-base font-semibold text-center transition-colors duration-300 ${
+                            activeCategory === category.categoryName
+                              ? "text-orange-600"
+                              : "text-gray-800 group-hover:text-orange-600"
+                          }`}
+                        >
+                          {category.categoryName}
+                        </h3>
+                      </div>
+                    </CarouselItem>
+                  ))}
             </CarouselContent>
 
             {/* Navigation Buttons */}

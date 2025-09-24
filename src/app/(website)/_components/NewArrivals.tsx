@@ -4,7 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { Star, Heart, Minus, Plus } from "lucide-react";
+import { Heart, Minus, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
@@ -19,6 +19,9 @@ import {
 // 🟢 Autoplay plugin
 import Autoplay from "embla-carousel-autoplay";
 
+// 🟢 Skeleton component
+import { Skeleton } from "@/components/ui/skeleton";
+
 type Product = {
   _id: string;
   name: string;
@@ -27,39 +30,11 @@ type Product = {
   price: number;
   discountPrice: number;
   category?: { name: string };
+  status?: string;
 };
 
 type ApiResponse = {
   data: Product[];
-};
-
-const renderStars = (rating: number) => {
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 >= 0.5;
-  const emptyStars = 5 - Math.ceil(rating);
-
-  return (
-    <div className="flex items-center gap-0.5">
-      {Array(fullStars)
-        .fill(0)
-        .map((_, i) => (
-          <Star key={i} size={14} fill="#F59E0B" className="text-amber-500" />
-        ))}
-      {halfStar && (
-        <Star
-          key="half"
-          size={14}
-          fill="#F59E0B"
-          className="text-amber-500 opacity-50"
-        />
-      )}
-      {Array(emptyStars)
-        .fill(0)
-        .map((_, i) => (
-          <Star key={`empty-${i}`} size={14} className="text-slate-300" />
-        ))}
-    </div>
-  );
 };
 
 export default function NewArrivalProducts() {
@@ -70,7 +45,7 @@ export default function NewArrivalProducts() {
   const queryClient = useQueryClient();
 
   // ✅ Fetch new arrivals
-  const { data: newArrival, isLoading, isError } = useQuery<ApiResponse>({
+  const { data: newArrival, isLoading } = useQuery<ApiResponse>({
     queryKey: ["newarrival"],
     queryFn: async () => {
       const res = await fetch(
@@ -80,6 +55,9 @@ export default function NewArrivalProducts() {
       return res.json();
     },
   });
+
+  const approvedProducts: Product[] =
+    newArrival?.data?.filter((product) => product.status === "approved") || [];
 
   // ✅ Fetch cart
   const { data: cartData } = useQuery({
@@ -177,26 +155,41 @@ export default function NewArrivalProducts() {
     setIsVisible(true);
   }, []);
 
-  if (isLoading)
-    return (
-      <div className="flex justify-center items-center h-64 text-lg font-semibold">
-        Loading new arrivals...
-      </div>
-    );
-  if (isError)
-    return (
-      <div className="flex justify-center items-center h-64 text-lg font-semibold text-red-500">
-        Failed to load products.
-      </div>
-    );
-
   return (
     <section className="py-8 sm:py-12 lg:py-16 container mx-auto">
-      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-8 sm:mb-12 text-center tracking-tight">
-        New Arrival Products
-      </h2>
+      <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+        <h2 className="text-3xl sm:text-4xl lg:text-4xl font-extrabold tracking-tight bg-clip-text text-black drop-shadow-lg animate-gradient-x">
+          New Arrival Products
+        </h2>
+        <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+          Check out the latest additions to our collection — fresh, trendy, and ready to impress.
+        </p>
+      </div>
 
-      {newArrival?.data?.length === 0 ? (
+      {/* 🟢 Skeleton Loading */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="group relative rounded-3xl overflow-hidden p-4 animate-pulse flex flex-col gap-3 bg-white border border-slate-100"
+            >
+              {/* Image Skeleton */}
+              <Skeleton className="w-full h-72 rounded-2xl bg-gray-300" />
+              {/* Discount badge skeleton */}
+              <Skeleton className="w-16 h-5 rounded-full bg-gray-200 absolute top-4 left-4" />
+              {/* Wishlist skeleton */}
+              <Skeleton className="w-10 h-10 rounded-full bg-gray-200 absolute top-16 left-4" />
+              {/* Title Skeleton */}
+              <Skeleton className="w-3/4 h-6 rounded-md bg-gray-300 mt-3" />
+              {/* Price Skeleton */}
+              <Skeleton className="w-1/2 h-5 rounded-md bg-gray-300" />
+              {/* Add to Cart Skeleton */}
+              <Skeleton className="w-full h-10 rounded-2xl bg-gray-300" />
+            </div>
+          ))}
+        </div>
+      ) : approvedProducts?.length === 0 ? (
         <div className="flex justify-center items-center h-64 rounded-2xl shadow-lg">
           <p className="text-gray-500 text-lg sm:text-xl font-semibold">
             No Products Found 😔
@@ -209,7 +202,7 @@ export default function NewArrivalProducts() {
           className="w-full"
         >
           <CarouselContent className="-ml-3 sm:-ml-4">
-            {newArrival?.data?.map((product: Product, index: number) => {
+            {approvedProducts.map((product: Product, index: number) => {
               const cartItem = cartData?.data?.find(
                 (item: any) => item.productId._id === product._id
               );
@@ -284,14 +277,6 @@ export default function NewArrivalProducts() {
                         <h3 className="text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
                           {product.name}
                         </h3>
-                        <p className="text-slate-600 text-sm mt-2 line-clamp-2 leading-relaxed">
-                          {product.description.replace(/<[^>]+>/g, "")}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {renderStars(4)}
-                        <span className="text-amber-600 font-semibold text-sm">4.0</span>
                       </div>
 
                       {/* Price & Cart */}

@@ -45,6 +45,7 @@ interface WishlistResponse {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [searchValue, setSearchValue] = useState<string>("");
 
   const toggleMenu = (): void => {
@@ -56,10 +57,16 @@ const Navbar = () => {
   const userId = user?.id;
   const pathname = usePathname();
 
-  // Handle scroll effect
+  // Handle scroll effect for background and shadow
   useEffect(() => {
     const handleScroll = (): void => {
       setIsScrolled(window.scrollY > 20);
+
+      // progress bar logic
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const scrolled = (scrollTop / docHeight) * 100;
+      setScrollProgress(scrolled);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -86,6 +93,7 @@ const Navbar = () => {
 
       return res.json();
     },
+    enabled: !!userId && status === "authenticated",
   });
 
   const { data: wishlist, isLoading: wishlistLoading } =
@@ -116,17 +124,17 @@ const Navbar = () => {
   const totalWishlist = wishlist?.data?.length || 0;
 
   const navigationItems = [
-    { label: "Home", href: "/" },
-    { label: "Products", href: "/products" },
-    { label: "About Us", href: "/about-us" },
-    { label: "Blogs", href: "/blog" },
-    { label: "Become a Seller", href: "/become-seller" }
+    { label: "HOME", href: "/" },
+    { label: "PRODUCTS", href: "/products" },
+    { label: "ABOUT US", href: "/about-us" },
+    { label: "BLOGS", href: "/blog" },
+    { label: "OFFERS", href: "/offer" },
+    { label: "BECOME A SELLER", href: "/become-seller" },
   ];
 
   const handleSearch = (e: React.FormEvent): void => {
     e.preventDefault();
     if (searchValue.trim()) {
-      // Handle search logic here
       console.log("Searching for:", searchValue);
     }
   };
@@ -139,7 +147,15 @@ const Navbar = () => {
           : "bg-white shadow-xl border-b border-gray-100"
       }`}
     >
-      {/* Top banner for promotions */}
+      {/* Scroll progress bar */}
+      <div className="absolute top-0 left-0 right-0 h-1">
+        <div
+          className="h-full bg-gradient-to-r from-red-600 to-orange-500 transition-all duration-150"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
+      {/* Top banner */}
       <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white text-center py-2 text-sm font-medium">
         <div className="flex items-center justify-center gap-2 animate-pulse">
           <Sparkles className="h-4 w-4" />
@@ -149,9 +165,9 @@ const Navbar = () => {
       </div>
 
       <div className="container mx-auto">
-        <div className="flex justify-between items-center h-16 md:h-20">
+        <div className="flex justify-between items-center h-16 md:h-20 relative">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 z-20">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative h-[50px] w-[50px] flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
@@ -175,8 +191,8 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1 lg:space-x-2">
+          {/* Navigation centered (desktop only) */}
+          <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center space-x-2">
             {navigationItems.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -198,28 +214,8 @@ const Navbar = () => {
             })}
           </div>
 
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center flex-1 max-w-sm mx-6">
-            <form onSubmit={handleSearch} className="w-full relative group">
-              <Input
-                type="text"
-                placeholder="Search fresh products..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className="w-full pr-12 rounded-full border-2 border-gray-200 focus:border-red-400 focus:ring-red-400/20 transition-all duration-300 bg-gray-50/50 group-hover:bg-white"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 shadow-lg hover:shadow-red-500/25 transition-all duration-300"
-              >
-                <Search className="h-4 w-4 text-white" />
-              </Button>
-            </form>
-          </div>
-
           {/* Action Icons */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 z-20">
             {/* Wishlist */}
             <Link
               href="/wishlist"
@@ -254,22 +250,18 @@ const Navbar = () => {
               {user ? (
                 <div className="flex items-center gap-2">
                   <div className="relative">
-                    {/* Avatar circle */}
                     <div className="h-9 w-9 rounded-full bg-gradient-to-r from-red-600 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
                       {user.name?.charAt(0).toUpperCase() ||
                         user.email?.charAt(0).toUpperCase() ||
                         "U"}
                     </div>
-                    {/* Tooltip effect */}
                     <span className="absolute left-1/2 -translate-x-1/2 mt-2 text-xs bg-gray-800 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                       {user.name || user.email}
                     </span>
                   </div>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <CircleUser className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors duration-300" />
-                </div>
+                <CircleUser className="h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors duration-300" />
               )}
             </Link>
 
@@ -295,7 +287,7 @@ const Navbar = () => {
           isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 px-4 py-4 space-y-2">
+        <div className="bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 px-2 py-4 space-y-2">
           {/* Mobile Search */}
           <div className="mb-4">
             <form onSubmit={handleSearch} className="relative">
@@ -317,7 +309,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Navigation Links */}
-          {navigationItems.map(({ label, href }, index) => {
+          {navigationItems.map(({ label, href }) => {
             const isActive = pathname === href;
             return (
               <Link
