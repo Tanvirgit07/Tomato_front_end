@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,15 +23,9 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Shop name must be at least 2 characters." }),
-  logo: z
-    .string()
-    .min(1, { message: "Logo is required (use initials or short code)." }),
-  description: z
-    .string()
-    .min(10, { message: "Description must be at least 10 characters." }),
+  name: z.string().min(2, { message: "Shop name must be at least 2 characters." }),
+  logo: z.string().min(1, { message: "Logo is required (use initials or short code)." }),
+  description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   founded: z.string().min(4, { message: "Founded year is required." }),
   rating: z.string().min(1, { message: "Rating is required." }),
   products: z.string().min(1, { message: "Products count is required." }),
@@ -53,8 +48,8 @@ export function BecomeSellerForm() {
       products: "",
       verified: false,
       featured: false,
-      color: "#ec4899", // pink-600
-      lightColor: "#fce7f3", // pink-50
+      color: "#ec4899",
+      lightColor: "#fce7f3",
       website: "",
     },
   });
@@ -69,9 +64,7 @@ export function BecomeSellerForm() {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/seller/become-seller`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(bodyData),
         }
       );
@@ -80,38 +73,29 @@ export function BecomeSellerForm() {
         const error = await res.json();
         throw new Error(error.message || "Failed to submit application");
       }
-
       return res.json();
     },
-    onSuccess: (data) => {
-      toast.success("Seller application submitted successfully!");
-      console.log("✅ Response:", data);
-      // You can also close modal here if you’re using shadcn Dialog
-    },
-    onError: (error: any) => {
-      toast.error(error.message || "Something went wrong");
-      console.error("❌ Error:", error);
-    },
+    onSuccess: () => toast.success("Seller application submitted successfully!"),
+    onError: (error: any) => toast.error(error.message || "Something went wrong"),
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const payload = { ...values, email };
-    console.log("Seller Form Data:", payload);
-
-    sellerMutation.mutate(payload);
-  }
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    sellerMutation.mutate({ ...values, email });
+  };
 
   return (
-    <div className="py-16">
-      <div className="container mx-auto bg-white rounded-2xl shadow-lg p-8 border">
-        <h2 className="text-3xl font-bold mb-8 text-center text-purple-700">
+    <div className="py-6">
+      <div className="bg-white p-8 rounded-2xl shadow-lg border border-purple-100 max-w-3xl mx-auto">
+        {/* <h2 className="text-3xl font-extrabold text-center bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-6">
           Become a Seller
         </h2>
+        <p className="text-center text-gray-500 mb-8">
+          Fill out the form below to start your seller journey.
+        </p> */}
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* 2-Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Shop Name */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <FormField
                 control={form.control}
                 name="name"
@@ -119,14 +103,13 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Shop Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="FashionHub" {...field} />
+                      <Input placeholder="FashionHub" {...field} className="rounded-xl border-gray-300 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Logo */}
               <FormField
                 control={form.control}
                 name="logo"
@@ -134,13 +117,13 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Logo (short code)</FormLabel>
                     <FormControl>
-                      <Input placeholder="FH" {...field} />
+                      <Input placeholder="FH" {...field} className="rounded-xl border-gray-300 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {/* Founded Year */}
+
               <FormField
                 control={form.control}
                 name="founded"
@@ -148,14 +131,13 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Founded Year</FormLabel>
                     <FormControl>
-                      <Input placeholder="2016" {...field} />
+                      <Input placeholder="2016" {...field} className="rounded-xl border-gray-300 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Rating */}
               <FormField
                 control={form.control}
                 name="rating"
@@ -163,19 +145,13 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Rating</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="4.5"
-                        type="number"
-                        step="0.1"
-                        {...field}
-                      />
+                      <Input type="number" step="0.1" placeholder="4.5" {...field} className="rounded-xl border-gray-300 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Products */}
               <FormField
                 control={form.control}
                 name="products"
@@ -183,14 +159,13 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Number of Products</FormLabel>
                     <FormControl>
-                      <Input placeholder="445" type="number" {...field} />
+                      <Input type="number" placeholder="445" {...field} className="rounded-xl border-gray-300 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Primary Color */}
               <FormField
                 control={form.control}
                 name="color"
@@ -198,18 +173,13 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Primary Color</FormLabel>
                     <FormControl>
-                      <Input
-                        type="color"
-                        {...field}
-                        className="h-12 cursor-pointer"
-                      />
+                      <Input type="color" {...field} className="h-12 w-full cursor-pointer rounded-xl border" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Light Color */}
               <FormField
                 control={form.control}
                 name="lightColor"
@@ -217,11 +187,7 @@ export function BecomeSellerForm() {
                   <FormItem>
                     <FormLabel>Light Color</FormLabel>
                     <FormControl>
-                      <Input
-                        type="color"
-                        {...field}
-                        className="h-12 cursor-pointer"
-                      />
+                      <Input type="color" {...field} className="h-12 w-full cursor-pointer rounded-xl border" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -229,7 +195,6 @@ export function BecomeSellerForm() {
               />
             </div>
 
-            {/* Description (full width) */}
             <FormField
               control={form.control}
               name="description"
@@ -241,17 +206,15 @@ export function BecomeSellerForm() {
                       rows={4}
                       placeholder="Trendy clothing and fashion accessories"
                       {...field}
+                      className="rounded-xl border-gray-300 shadow-sm"
                     />
                   </FormControl>
-                  <FormDescription>
-                    Tell customers about your shop.
-                  </FormDescription>
+                  <FormDescription>Tell customers about your shop.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Website (full width) */}
             <FormField
               control={form.control}
               name="website"
@@ -259,25 +222,21 @@ export function BecomeSellerForm() {
                 <FormItem>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://fashionhub.com" {...field} />
+                    <Input placeholder="https://fashionhub.com" {...field} className="rounded-xl border-gray-300 shadow-sm" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Checkboxes */}
-            <div className="flex gap-6">
+            <div className="flex gap-6 flex-wrap">
               <FormField
                 control={form.control}
                 name="verified"
                 render={({ field }) => (
                   <FormItem className="flex items-center gap-2">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <FormLabel>Verified Seller</FormLabel>
                   </FormItem>
@@ -289,10 +248,7 @@ export function BecomeSellerForm() {
                 render={({ field }) => (
                   <FormItem className="flex items-center gap-2">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <FormLabel>Featured Seller</FormLabel>
                   </FormItem>
@@ -300,8 +256,10 @@ export function BecomeSellerForm() {
               />
             </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 hover:opacity-90 shadow-md"
+            >
               Submit Application
             </Button>
           </form>

@@ -1,161 +1,196 @@
-"use client"
+"use client";
+
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Mail, Phone, MapPin, CheckCircle2 } from "lucide-react";
+
+// Validation Schema
+const formSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  message: z
+    .string()
+    .min(10, { message: "Message must be at least 10 characters." }),
+});
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      message: "",
+    },
+  });
 
-  const validateForm = () => {
-    let isValid = true;
-    const newErrors = { name: "", email: "", message: "" };
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-      isValid = false;
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-      isValid = false;
-    }
-
-    if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsSubmitted(true);
-      console.log("Form submitted:", formData);
-      setFormData({ name: "", email: "", message: "" });
-      setTimeout(() => setIsSubmitted(false), 3000);
-    }
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log("Form submitted:", values);
+    setIsSubmitted(true);
+    form.reset();
+    setTimeout(() => setIsSubmitted(false), 3000);
   };
 
   return (
-    <div className="max-w-5xl mx-auto my-20 px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Left Side: Contact Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-            <CardDescription>Reach out to us directly or use the form.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center space-x-4">
-              <Mail className="w-6 h-6 text-primary" />
-              <div>
-                <h3 className="font-semibold">Email</h3>
-                <p className="text-sm text-gray-600">support@example.com</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Phone className="w-6 h-6 text-primary" />
-              <div>
-                <h3 className="font-semibold">Phone</h3>
-                <p className="text-sm text-gray-600">+1 (123) 456-7890</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <MapPin className="w-6 h-6 text-primary" />
-              <div>
-                <h3 className="font-semibold">Address</h3>
-                <p className="text-sm text-gray-600">123 Main St, City, Country</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="relative py-20 px-4 bg-gradient-to-r from-indigo-50 via-white to-indigo-50">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Heading */}
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+          Get in Touch
+        </h2>
+        <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          Have questions or feedback? We’d love to hear from you. Reach out to us directly or send us a message.
+        </p>
 
-        {/* Right Side: Contact Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Send Us a Message</CardTitle>
-            <CardDescription>We&apos;ll get back to you as soon as possible.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isSubmitted && (
-              <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
-                Message sent successfully!
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="Enter your name"
-                  className={errors.name ? "border-red-500" : ""}
-                />
-                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {/* Left Side: Contact Information */}
+          <Card className="shadow-lg p-6 hover:shadow-xl transition rounded-2xl border-0 bg-gradient-to-br from-white to-indigo-50">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Contact Information</CardTitle>
+              <CardDescription className="text-gray-600">
+                Reach out to us directly or use the form.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {[
+                {
+                  icon: Mail,
+                  title: "Email",
+                  value: "support@example.com",
+                },
+                {
+                  icon: Phone,
+                  title: "Phone",
+                  value: "+1 (123) 456-7890",
+                },
+                {
+                  icon: MapPin,
+                  title: "Address",
+                  value: "123 Main St, City, Country",
+                },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center gap-4 p-3 rounded-lg bg-white shadow-sm hover:shadow-md hover:scale-[1.02] transition"
+                >
+                  <item.icon className="w-6 h-6 text-primary" />
+                  <div>
+                    <h3 className="font-semibold">{item.title}</h3>
+                    <p className="text-sm text-gray-600">{item.value}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter your email"
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-              </div>
+          {/* Right Side: Contact Form */}
+          <Card className="shadow-lg p-6 hover:shadow-xl transition rounded-2xl border-0 bg-white">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold">Send Us a Message</CardTitle>
+              <CardDescription className="text-gray-600">
+                We&apos;ll get back to you as soon as possible.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isSubmitted && (
+                <div className="mb-4 flex items-center gap-2 p-4 bg-green-100 text-green-700 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Message sent successfully!</span>
+                </div>
+              )}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter your name"
+                            {...field}
+                            className="rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Enter your message"
-                  className={errors.message ? "border-red-500" : ""}
-                  rows={4}
-                />
-                {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
-              </div>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            {...field}
+                            className="rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button type="submit" className="w-full">
-                Send Message
-              </Button>
-            </div>
-            </form>
-          </CardContent>
-        </Card>
+                  <FormField
+                    control={form.control}
+                    name="message"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Enter your message"
+                            rows={4}
+                            {...field}
+                            className="rounded-lg"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    className="w-full rounded-lg text-white font-medium bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 transition"
+                  >
+                    Send Message
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

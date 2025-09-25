@@ -81,7 +81,7 @@ const SignUpFrom: React.FC = () => {
   };
 
   return (
-    <div className="h-screen mt-16 flex flex-col lg:flex-row">
+    <div className="h-screen flex flex-col lg:flex-row">
       {/* Left - Image */}
       <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
         <Image
