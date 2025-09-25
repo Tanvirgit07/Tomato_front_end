@@ -1,3 +1,6 @@
+"use client";
+
+import CommentModal from "@/components/modal/CommentModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,10 +12,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
 import { Search, MessageCircle, Heart, Share2, Calendar } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function BlogPage() {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["blogs"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/blog/getallblog`
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch blogs");
+      }
+
+      return res.json();
+    },
+  });
+
+  // ✅ Adjust this based on your backend response
+  const blogs = data?.blogs || data?.data || [];
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex justify-center items-center">
+        <p className="text-lg font-medium text-indigo-600">Loading blogs...</p>
+      </main>
+    );
+  }
+
+  if (isError) {
+    return (
+      <main className="min-h-screen flex justify-center items-center">
+        <p className="text-red-500 font-medium">
+          Error: {(error as Error).message}
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,9 +73,9 @@ export default function BlogPage() {
           </p>
         </div>
 
-        {/* Filters and Search (Top Section) */}
+        {/* Filters and Search */}
         <div className="mb-12">
-          <Card className="rounded-3xl  border border-indigo-100 p-6">
+          <Card className="rounded-3xl border border-indigo-100 p-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
               {/* Search */}
               <div className="w-full sm:w-1/2 md:w-1/3">
@@ -97,113 +138,75 @@ export default function BlogPage() {
 
         {/* Blog Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            {
-              id: 1,
-              title: "Top 5 Skincare Tips for Glowing Skin",
-              category: "Beauty Tips",
-              excerpt:
-                "Discover expert tips to achieve radiant, healthy skin with our daily skincare routine.",
-              image:
-                "https://images.unsplash.com/photo-1616394584738-fc6e6126b1c8?w=400&h=250&fit=crop",
-              date: "August 10, 2025",
-              comments: 12,
-              likes: 45,
-            },
-            {
-              id: 2,
-              title: "How to Choose the Perfect Foundation",
-              category: "Product Guides",
-              excerpt:
-                "Find the right foundation for your skin type with our comprehensive guide.",
-              image:
-                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=250&fit=crop",
-              date: "August 8, 2025",
-              comments: 8,
-              likes: 32,
-            },
-            {
-              id: 3,
-              title: "Mindfulness for Better Wellness",
-              category: "Wellness",
-              excerpt:
-                "Learn how mindfulness can enhance your daily beauty and wellness routine.",
-              image:
-                "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=400&h=250&fit=crop",
-              date: "August 5, 2025",
-              comments: 15,
-              likes: 50,
-            },
-            {
-              id: 4,
-              title: "Mastering Smokey Eye Makeup",
-              category: "Tutorials",
-              excerpt:
-                "Step-by-step tutorial to create a stunning smokey eye look for any occasion.",
-              image:
-                "https://images.unsplash.com/photo-1512496015850-a8ee5066e54c?w=400&h=250&fit=crop",
-              date: "August 3, 2025",
-              comments: 10,
-              likes: 28,
-            },
-          ].map((post) => (
-            <Card
-              key={post.id}
-              className="group relative bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-indigo-100 animate-fade-in"
-            >
-              {/* Image Container */}
-              <div className="relative overflow-hidden">
-                <Image
-                width={300}
-                height={300}
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
-                {/* Category Badge */}
-                <div className="absolute top-4 right-4">
-                  <div className="bg-indigo-100/90 backdrop-blur-sm text-indigo-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-                    {post.category}
+          {blogs.length === 0 ? (
+            <p className="text-gray-500 col-span-full text-center">
+              No blogs found.
+            </p>
+          ) : (
+            blogs.map((post: any) => (
+              <Card
+                key={post._id}
+                className="group relative bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-indigo-100 animate-fade-in"
+              >
+                {/* Image Container */}
+                <div className="relative overflow-hidden">
+                  <Link href={`/blog/${post?._id}`}>
+                    <Image
+                      width={400}
+                      height={400}
+                      src={post.featuredImage?.url || "/placeholder.jpg"}
+                      alt={post.title}
+                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                  </Link>
+                  {/* Category Badge */}
+                  <div className="absolute top-4 right-4">
+                    <div className="bg-indigo-100/90 backdrop-blur-sm text-indigo-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                      {post.category || "Uncategorized"}
+                    </div>
                   </div>
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-              </div>
 
-              {/* Content */}
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Calendar className="w-4 h-4 text-indigo-500" />
-                  <span>{post.date}</span>
-                </div>
-                <h3 className="text-xl font-bold text-indigo-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-300">
-                  {post.title}
-                </h3>
-                <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
-                  {post.excerpt}
-                </p>
-              </CardContent>
+                {/* Content */}
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Calendar className="w-4 h-4 text-indigo-500" />
+                    <span>
+                      {post.createdAt
+                        ? new Date(post.createdAt).toLocaleDateString()
+                        : "Unknown date"}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-indigo-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-300">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
+                    {post.excerpt || "No excerpt available"}
+                  </p>
+                </CardContent>
 
-              {/* Footer: Comments and Reactions */}
-              <CardFooter className="flex justify-between items-center p-6 pt-0 bg-gradient-to-t from-indigo-50/50 to-transparent">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <MessageCircle className="w-5 h-5 text-indigo-500" />
-                  <span className="text-sm font-medium">
-                    {post.comments} Comments
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors duration-300">
-                    <Heart className="w-5 h-5" />
-                    <span className="text-sm font-medium">{post.likes}</span>
-                  </button>
-                  <button className="text-gray-600 hover:text-indigo-600 transition-colors duration-300">
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+                {/* Footer: Comments and Reactions */}
+                <CardFooter className="flex justify-between items-center p-6 pt-0 bg-gradient-to-t from-indigo-50/50 to-transparent">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <CommentModal blogId={post._id} />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors duration-300">
+                      <Heart className="w-5 h-5" />
+                      <span className="text-sm font-medium">
+                        {post.views || 0}
+                      </span>
+                    </button>
+                    <button className="text-gray-600 hover:text-indigo-600 transition-colors duration-300">
+                      <Share2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Load More Button */}
