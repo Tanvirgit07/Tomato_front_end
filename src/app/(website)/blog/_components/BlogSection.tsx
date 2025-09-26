@@ -12,12 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, MessageCircle, Heart, Share2, Calendar } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function BlogPage() {
+  const { data: session } = useSession();
+  const user = session?.user as any;
+  const token = user?.accessToken;
+  const queryClient = useQueryClient();
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["blogs"],
     queryFn: async () => {
@@ -25,26 +31,42 @@ export default function BlogPage() {
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/blog/getallblog`
       );
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch blogs");
-      }
-
+      if (!res.ok) throw new Error("Failed to fetch blogs");
       return res.json();
     },
   });
 
-  // ✅ Adjust this based on your backend response
+  const addLikeMutation = useMutation({
+    mutationFn: async (blogId: string) => {
+      if (!token) throw new Error("User not authenticated");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/blog/addlike/${blogId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to like/unlike blog");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
+    },
+  });
+
   const blogs = data?.blogs || data?.data || [];
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <main className="min-h-screen flex justify-center items-center">
         <p className="text-lg font-medium text-indigo-600">Loading blogs...</p>
       </main>
     );
-  }
 
-  if (isError) {
+  if (isError)
     return (
       <main className="min-h-screen flex justify-center items-center">
         <p className="text-red-500 font-medium">
@@ -52,7 +74,6 @@ export default function BlogPage() {
         </p>
       </main>
     );
-  }
 
   return (
     <main className="min-h-screen py-12">
@@ -77,19 +98,12 @@ export default function BlogPage() {
         <div className="mb-12">
           <Card className="rounded-3xl border border-indigo-100 p-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
-              {/* Search */}
               <div className="w-full sm:w-1/2 md:w-1/3">
-                <Label
-                  htmlFor="search"
-                  className="text-indigo-800 font-semibold"
-                >
+                <Label htmlFor="search" className="text-indigo-800 font-semibold">
                   Search Articles
                 </Label>
                 <div className="relative mt-2">
-                  <Search
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400"
-                    size={20}
-                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-indigo-400" size={20} />
                   <Input
                     id="search"
                     placeholder="Search for articles..."
@@ -98,12 +112,8 @@ export default function BlogPage() {
                 </div>
               </div>
 
-              {/* Category Filter */}
               <div className="w-full sm:w-auto">
-                <Label
-                  htmlFor="category"
-                  className="text-indigo-800 font-semibold"
-                >
+                <Label htmlFor="category" className="text-indigo-800 font-semibold">
                   Category
                 </Label>
                 <Select>
@@ -114,21 +124,13 @@ export default function BlogPage() {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl bg-white border-indigo-200">
-                    {[
-                      "All Categories",
-                      "Beauty Tips",
-                      "Product Guides",
-                      "Wellness",
-                      "Tutorials",
-                    ].map((category) => (
-                      <SelectItem
-                        key={category}
-                        value={category}
-                        className="text-gray-700 hover:bg-indigo-50"
-                      >
-                        {category}
-                      </SelectItem>
-                    ))}
+                    {["All Categories", "Beauty Tips", "Product Guides", "Wellness", "Tutorials"].map(
+                      (category) => (
+                        <SelectItem key={category} value={category} className="text-gray-700 hover:bg-indigo-50">
+                          {category}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -139,18 +141,16 @@ export default function BlogPage() {
         {/* Blog Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {blogs.length === 0 ? (
-            <p className="text-gray-500 col-span-full text-center">
-              No blogs found.
-            </p>
+            <p className="text-gray-500 col-span-full text-center">No blogs found.</p>
           ) : (
             blogs.map((post: any) => (
               <Card
                 key={post._id}
                 className="group relative bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-indigo-100 animate-fade-in"
               >
-                {/* Image Container */}
+                {/* Image */}
                 <div className="relative overflow-hidden">
-                  <Link href={`/blog/${post?._id}`}>
+                  <Link href={`/blog/${post._id}`}>
                     <Image
                       width={400}
                       height={400}
@@ -159,13 +159,11 @@ export default function BlogPage() {
                       className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     />
                   </Link>
-                  {/* Category Badge */}
                   <div className="absolute top-4 right-4">
                     <div className="bg-indigo-100/90 backdrop-blur-sm text-indigo-800 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
                       {post.category || "Uncategorized"}
                     </div>
                   </div>
-                  {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
 
@@ -173,31 +171,31 @@ export default function BlogPage() {
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Calendar className="w-4 h-4 text-indigo-500" />
-                    <span>
-                      {post.createdAt
-                        ? new Date(post.createdAt).toLocaleDateString()
-                        : "Unknown date"}
-                    </span>
+                    <span>{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "Unknown date"}</span>
                   </div>
                   <h3 className="text-xl font-bold text-indigo-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-300">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
-                    {post.excerpt || "No excerpt available"}
-                  </p>
+                  <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">{post.excerpt || "No excerpt available"}</p>
                 </CardContent>
 
-                {/* Footer: Comments and Reactions */}
+                {/* Footer */}
                 <CardFooter className="flex justify-between items-center p-6 pt-0 bg-gradient-to-t from-indigo-50/50 to-transparent">
                   <div className="flex items-center gap-2 text-gray-600">
-                    <CommentModal blogId={post._id} />
+                    <Link href={`/blog/${post._id}#comment`}>
+                      <button className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors duration-300">
+                        <MessageCircle className="w-5 h-5 text-indigo-500" />
+                        <span className="text-sm font-medium">Add Comment</span>
+                      </button>
+                    </Link>
                   </div>
                   <div className="flex items-center gap-4">
-                    <button className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors duration-300">
+                    <button
+                      onClick={() => addLikeMutation.mutate(post._id)}
+                      className="flex items-center gap-1 text-gray-600 hover:text-red-500 transition-colors duration-300"
+                    >
                       <Heart className="w-5 h-5" />
-                      <span className="text-sm font-medium">
-                        {post.views || 0}
-                      </span>
+                      <span className="text-sm font-medium">{post.likes?.length || 0}</span>
                     </button>
                     <button className="text-gray-600 hover:text-indigo-600 transition-colors duration-300">
                       <Share2 className="w-5 h-5" />
@@ -207,13 +205,6 @@ export default function BlogPage() {
               </Card>
             ))
           )}
-        </div>
-
-        {/* Load More Button */}
-        <div className="text-center mt-12">
-          <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-            Load More Articles
-          </Button>
         </div>
       </div>
     </main>

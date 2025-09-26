@@ -188,7 +188,7 @@ function BlogDetails() {
         {blog.featuredImage?.url && (
           <div className="mb-12">
             <div className="relative rounded-2xl overflow-hidden p-2">
-              <div className="relative w-full h-[350px] rounded-xl overflow-hidden">
+              <div className="relative w-full h-[450px] rounded-xl overflow-hidden">
                 <Image
                   src={blog.featuredImage.url}
                   alt={blog.title}
@@ -240,18 +240,6 @@ function BlogDetails() {
                     <span>{blog.views.toLocaleString()} views</span>
                   </div>
                 </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button
-                    onClick={handleShare}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Share
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
@@ -259,7 +247,7 @@ function BlogDetails() {
 
         {/* Blog Content */}
         <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
-          <CardContent className="p-8 md:p-12">
+          <CardContent className="">
             <div dangerouslySetInnerHTML={{ __html: blog.content }} />
 
             {/* Sub Images */}
