@@ -5,6 +5,7 @@ import SellerBenefits from './_components/SellerBenefits'
 import StepToStepSelling from './_components/StepToStepSelling'
 import SellerStory from './_components/SellerStory'
 import BecomeASellerBtn from './_components/BecomeASellerBtn'
+import AllSellerHere from './_components/AllSellerHere'
 
 function page() {
   return (
@@ -15,6 +16,9 @@ function page() {
       <SellerStory />
         {/* <BecomeSellerForm /> */}
         <BecomeASellerBtn />
+        <div>
+          <AllSellerHere />
+        </div>
     </div>
   )
 }

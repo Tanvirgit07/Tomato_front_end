@@ -38,7 +38,7 @@ interface BrandCardProps {
   index: number;
 }
 
-const BrandSection = () => {
+const AllSellerHere = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(4);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -309,7 +309,7 @@ const BrandSection = () => {
         {/* Sellers Display */}
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredBrands.slice(0,8).map((brand, index) => (
+            {filteredBrands.map((brand, index) => (
               <div
                 key={brand._id}
                 className="animate-fade-in"
@@ -442,4 +442,4 @@ const BrandSection = () => {
   );
 };
 
-export default BrandSection;
+export default AllSellerHere;
