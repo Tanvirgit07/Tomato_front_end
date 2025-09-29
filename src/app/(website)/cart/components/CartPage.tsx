@@ -46,6 +46,7 @@ export default function CartPage() {
       );
       if (!res.ok) throw new Error("Failed to fetch cart");
       return res.json();
+      return res.json();
     },
   });
 
