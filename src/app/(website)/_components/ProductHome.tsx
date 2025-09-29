@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Heart, Minus, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import Link from "next/link";
 
 type ProductHomeProps = {
   activeCategory: string;
@@ -205,13 +206,15 @@ export default function ProductHome({ activeCategory }: ProductHomeProps) {
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
                   <div className="relative overflow-hidden">
-                    <Image
-                      width={300}
-                      height={300}
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                    />
+                    <Link href={`/products/${product._id}`}>
+                      <Image
+                        width={300}
+                        height={300}
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
+                    </Link>
                     <div className="absolute top-4 right-4 z-10">
                       <div className="bg-white/90 backdrop-blur-sm text-slate-700 px-3 py-1 rounded-full text-xs font-medium">
                         {product.category?.name}

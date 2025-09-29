@@ -169,17 +169,6 @@ export default function OfferPage() {
                 </div>
               ))}
         </div>
-
-        {/* {allProducts.length > 6 && (
-          <div className="text-center mt-12">
-            <button
-              onClick={() => setShowAll((prev) => !prev)}
-              className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-            >
-              {showAll ? "See Less" : "See More"}
-            </button>
-          </div>
-        )} */}
       </div>
     </section>
   );

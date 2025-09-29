@@ -107,7 +107,7 @@ export default function SimpleOfferGallery() {
                   </div>
                 </div>
               ))
-            : displayedProducts.map((item:any, index: number) => (
+            : displayedProducts.map((item: any, index: number) => (
                 <div
                   key={item._id}
                   className="group relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 cursor-pointer"
@@ -170,17 +170,13 @@ export default function SimpleOfferGallery() {
               ))}
         </div>
 
-        {/* See More Button */}
-        {allProducts.length > 6 && (
-          <div className="text-center mt-12">
-            <button
-              onClick={() => setShowAll((prev) => !prev)}
-              className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-            >
-              {showAll ? "See Less" : "See More"}
+        <div className="text-center mt-12">
+          <Link href={"/offer"}>
+            <button className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+              showAll
             </button>
-          </div>
-        )}
+          </Link>
+        </div>
       </div>
     </section>
   );

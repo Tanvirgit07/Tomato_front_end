@@ -157,7 +157,7 @@ export default function AllProducts() {
   });
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-12">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 py-20">
       <div className="container mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -188,7 +188,7 @@ export default function AllProducts() {
           </div>
           <div className="flex gap-4">
             <Select onValueChange={(value) => setCategory(value)}>
-              <SelectTrigger className="w-[230px]">
+              <SelectTrigger className="w-[230px] !h-[50px]">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
               <SelectContent>

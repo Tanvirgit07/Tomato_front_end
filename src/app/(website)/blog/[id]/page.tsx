@@ -1,12 +1,12 @@
 import React from 'react'
 import BlogDetails from '../_components/BlogDetails'
-import BologComment from '../_components/BologComment'
+// import BologComment from '../_components/BologComment'
 
 function page() {
   return (
-    <div>
+    <div className='pt-10'>
         <BlogDetails />
-        <BologComment />
+        {/* <BologComment /> */}
     </div>
   )
 }

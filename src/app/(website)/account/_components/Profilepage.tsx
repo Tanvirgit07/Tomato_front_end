@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ export default function Profilepage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4">
         {/* Main Profile Card */}
         <div className="max-w-2xl mx-auto">
           <Card>

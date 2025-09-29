@@ -4,13 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import React from "react";
 import Image from "next/image";
-import { Calendar, User, Eye, ArrowLeft, Share2 } from "lucide-react";
+import {
+  Calendar,
+  Eye,
+  ArrowLeft,
+  Share2,
+  Linkedin,
+  Twitter,
+  Facebook,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import BologComment from "./BologComment";
 
 interface BlogData {
   success: boolean;
@@ -70,7 +77,7 @@ function BlogDetails() {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     });
   };
@@ -95,8 +102,8 @@ function BlogDetails() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="min-h-screen bg-white">
+        <div className="max-w-4xl mx-auto px-6 py-12">
           {/* Header Skeleton */}
           <div className="mb-8">
             <Skeleton className="h-8 w-32 mb-4" />
@@ -126,8 +133,8 @@ function BlogDetails() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="container mx-auto px-4 max-w-2xl">
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="max-w-2xl mx-auto px-6">
           <Alert className="border-red-200 bg-red-50">
             <AlertDescription className="text-red-800">
               Failed to load blog details. Please try again later.
@@ -156,13 +163,13 @@ function BlogDetails() {
 
   if (!blogDetails?.data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Blog Not Found
           </h2>
           <p className="text-gray-600 mb-6">
-            The blog post you're looking for doesn't exist.
+            The blog post you&apos;re looking for doesn&apos;t exist.
           </p>
           <Button
             onClick={() => window.history.back()}
@@ -180,80 +187,127 @@ function BlogDetails() {
   const blog = blogDetails.data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-10">
-      <div className="container mx-auto px-4 py-8">
-        {/* Blog Header */}
-
-        {/* Featured Image */}
-        {blog.featuredImage?.url && (
-          <div className="mb-12">
-            <div className="relative rounded-2xl overflow-hidden p-2">
-              <div className="relative w-full h-[450px] rounded-xl overflow-hidden">
-                <Image
-                  src={blog.featuredImage.url}
-                  alt={blog.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-              <div className="my-8">
-                <div className="flex flex-wrap items-center gap-3 mb-6">
-                  <Badge
-                    variant="secondary"
-                    className="bg-blue-100 text-blue-800 hover:bg-blue-200 px-3 py-1"
-                  >
-                    {blog.category}
-                  </Badge>
-                  {!blog.isPublished && (
-                    <Badge
-                      variant="outline"
-                      className="border-orange-200 text-orange-800 bg-orange-50"
-                    >
-                      Draft
-                    </Badge>
-                  )}
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-6 gap-12">
+          {/* Left Sidebar - Author Info */}
+          <div className="lg:col-span-2">
+            <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
+              {/* Author Card */}
+              <div className="text-center mb-8">
+                {/* Avatar */}
+                <div className="w-28 h-28 mx-auto mb-4 bg-gradient-to-tr from-purple-400 via-pink-400 to-red-400 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-md">
+                  {blog.user.name.charAt(0).toUpperCase()}
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                  {blog.title}
-                </h1>
-
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                  {blog.excerpt}
+                {/* Author Info */}
+                <h3 className="font-semibold text-gray-900 text-xl mb-1">
+                  {blog.user.name}
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Published: {formatDate(blog.createdAt)}
                 </p>
 
-                {/* Meta Information */}
-                <div className="flex flex-wrap items-center gap-6 text-gray-500 mb-6">
-                  <div className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    <span className="font-medium text-gray-700">
-                      {blog.user.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    <span>{formatDate(blog.createdAt)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
-                    <span>{blog.views.toLocaleString()} views</span>
-                  </div>
+                {/* Author Bio */}
+                <p className="text-sm text-gray-500 italic mb-4">
+                  Passionate writer, sharing thoughts on{" "}
+                  <span className="font-medium text-gray-700">
+                    {blog.category}
+                  </span>
+                </p>
+
+                {/* Social Links */}
+                <div className="flex justify-center gap-3 mb-5">
+                  <button className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow">
+                    <Linkedin className="w-4 h-4" />
+                  </button>
+                  <button className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-400 text-white hover:bg-blue-500 transition-colors shadow">
+                    <Twitter className="w-4 h-4" />
+                  </button>
+                  <button className="w-9 h-9 flex items-center justify-center rounded-full bg-blue-800 text-white hover:bg-blue-900 transition-colors shadow">
+                    <Facebook className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Follow Button */}
+                <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg text-sm font-medium shadow hover:scale-105 transition-transform">
+                  Follow Author
+                </button>
+              </div>
+
+              {/* Blog Stats */}
+              <div className="space-y-4 text-sm text-gray-600 border-t pt-5">
+                <div className="flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-gray-500" />
+                  <span>{blog.views.toLocaleString()} views</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <span>Updated: {formatDate(blog.updatedAt)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full bg-green-500" />
+                  <span>
+                    Total Blogs: <b>24</b>
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Blog Content */}
-        <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
-          <CardContent className="">
-            <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+          {/* Main Content */}
+          <div className="lg:col-span-4">
+            {/* Category Badge */}
+            <div className="mb-6">
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-200 px-3 py-1 text-sm">
+                {blog.category}
+              </Badge>
+              {!blog.isPublished && (
+                <Badge
+                  variant="outline"
+                  className="ml-2 border-orange-200 text-orange-800 bg-orange-50"
+                >
+                  Draft
+                </Badge>
+              )}
+            </div>
 
-            {/* Sub Images */}
+            {/* Title */}
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              {blog.title}
+            </h1>
+
+            {/* Excerpt */}
+            <p className="text-xl text-gray-700 mb-8 leading-relaxed font-light">
+              {blog.excerpt}
+            </p>
+
+            {/* Featured Image */}
+            {blog.featuredImage?.url && (
+              <div className="mb-12">
+                <div className="relative w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
+                  <Image
+                    src={blog.featuredImage.url}
+                    alt={blog.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Blog Content */}
+            <div className="prose prose-lg max-w-none mb-12">
+              <div
+                className="text-gray-800 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: blog.content }}
+              />
+            </div>
+
+            {/* Sub Images Gallery */}
             {blog.subImages && blog.subImages.length > 0 && (
-              <div className="mt-12">
-                <Separator className="mb-8" />
+              <div className="mb-12">
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">
                   Gallery
                 </h3>
@@ -261,47 +315,44 @@ function BlogDetails() {
                   {blog.subImages.map((image, index) => (
                     <div
                       key={image._id}
-                      className="relative rounded-xl overflow-hidden shadow-lg bg-white p-2"
+                      className="relative aspect-video rounded-lg overflow-hidden shadow-lg"
                     >
-                      <div className="relative aspect-video rounded-lg overflow-hidden">
-                        <Image
-                          src={image.url}
-                          alt={`Gallery image ${index + 1}`}
-                          fill
-                          className="object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
+                      <Image
+                        src={image.url}
+                        alt={`Gallery image ${index + 1}`}
+                        fill
+                        className="object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
 
-        {/* Author Card */}
-        <Card className="mt-12 shadow-lg border-0 bg-white/70 backdrop-blur-sm">
-          <CardContent className="p-8">
-            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                {blog.user.name.charAt(0).toUpperCase()}
+            {/* Share Section */}
+            <div className="border-t border-gray-200 pt-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">
+                    Share this article
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Help others discover this content
+                  </p>
+                </div>
+                <Button
+                  onClick={handleShare}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </Button>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
-                  {blog.user.name}
-                </h3>
-                <p className="text-gray-600">Author</p>
+              <div className="mt-10">
+                <BologComment />
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <Separator className="mb-8" />
-          <div className="flex justify-between items-center text-sm text-gray-500">
-            <span>Published: {formatDate(blog.createdAt)}</span>
-            <span>Last updated: {formatDate(blog.updatedAt)}</span>
           </div>
         </div>
       </div>

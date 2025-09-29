@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
-import { Heart, ShoppingCart, Trash2, Eye } from "lucide-react";
+import { Heart, Eye, Minus, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 
 function Wishlists() {
@@ -11,9 +12,15 @@ function Wishlists() {
   const user = session?.data?.user as any;
   const userId = user?.id;
   const queryClient = useQueryClient();
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [addedToCart, setAddedToCart] = useState<Record<string, boolean>>({}); // ✅ Track added products
 
   // Get wishlist
-  const { data: wishlistData, isLoading, error } = useQuery({
+  const {
+    data: wishlistData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["wishlist", userId],
     queryFn: async () => {
       if (!userId) return [];
@@ -49,9 +56,15 @@ function Wishlists() {
 
   // Add to cart mutation
   const addToCartMutation = useMutation({
-    mutationFn: async (productId: string) => {
+    mutationFn: async ({
+      productId,
+      quantity,
+    }: {
+      productId: string;
+      quantity: number;
+    }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/add`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/cart/addtocart/${productId}`,
         {
           method: "POST",
           headers: {
@@ -60,14 +73,15 @@ function Wishlists() {
           body: JSON.stringify({
             userId,
             productId,
-            quantity: 1,
+            quantity,
           }),
         }
       );
       if (!res.ok) throw new Error("Failed to add to cart");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      setAddedToCart((prev) => ({ ...prev, [variables.productId]: true })); // ✅ Mark product as added
       toast.success("Added to cart!");
     },
     onError: () => {
@@ -77,12 +91,25 @@ function Wishlists() {
 
   const wishlist = wishlistData?.data || [];
 
+  const getQuantity = (productId: string) => quantities[productId] || 1;
+
+  const updateQuantity = (
+    productId: string,
+    newQuantity: number,
+    stock: number
+  ) => {
+    if (newQuantity >= 1 && newQuantity <= stock) {
+      setQuantities((prev) => ({ ...prev, [productId]: newQuantity }));
+    }
+  };
+
   const handleRemoveFromWishlist = (itemId: string) => {
     removeFromWishlistMutation.mutate(itemId);
   };
 
   const handleAddToCart = (productId: string) => {
-    addToCartMutation.mutate(productId);
+    const quantity = getQuantity(productId);
+    addToCartMutation.mutate({ productId, quantity });
   };
 
   const calculateDiscount = (originalPrice: number, discountPrice: number) => {
@@ -93,17 +120,21 @@ function Wishlists() {
   // Loading skeleton
   if (session.status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-1/4 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+            <div className="bg-gray-100 rounded-lg p-8">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg shadow-md p-4">
-                  <div className="h-48 bg-gray-300 rounded mb-4"></div>
-                  <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                  <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                <div
+                  key={i}
+                  className="flex items-center gap-4 py-4 border-b border-gray-200"
+                >
+                  <div className="w-16 h-16 bg-gray-200 rounded"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -116,15 +147,19 @@ function Wishlists() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="text-red-500 text-xl mb-4">Error loading wishlist</div>
+            <div className="text-red-500 text-xl mb-4">
+              Error loading wishlist
+            </div>
             <button
               onClick={() =>
-                queryClient.invalidateQueries({ queryKey: ["wishlist", userId] })
+                queryClient.invalidateQueries({
+                  queryKey: ["wishlist", userId],
+                })
               }
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900"
             >
               Try Again
             </button>
@@ -137,7 +172,7 @@ function Wishlists() {
   // Not logged in
   if (!session.data?.user) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Heart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
@@ -155,22 +190,26 @@ function Wishlists() {
 
   // Main UI
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Heart className="h-8 w-8 text-red-500" />
-              My Wishlist
+        <div className="text-center mb-8">
+          {/* Title with Heart Icon */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Heart className="h-6 w-6 text-red-500" />
+            <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-wide">
+              Wishlist
             </h1>
-            <p className="text-gray-600 mt-1">
-              {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved
-            </p>
           </div>
+
+          {/* Subtitle */}
+          <p className="text-sm text-gray-500 max-w-md mx-auto mb-3">
+            Save your favorite items here and revisit them anytime. Add to cart
+            when you&apos;re ready to checkout.
+          </p>
         </div>
 
-        {/* Wishlist Items */}
+        {/* Wishlist Table */}
         {wishlist.length === 0 ? (
           <div className="text-center py-16">
             <Heart className="mx-auto h-16 w-16 text-gray-300 mb-4" />
@@ -182,125 +221,190 @@ function Wishlists() {
             </p>
             <button
               onClick={() => (window.location.href = "/products")}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="bg-gray-800 text-white px-6 py-3 rounded hover:bg-gray-900 transition-colors"
             >
               Start Shopping
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {wishlist.map((item: any) => {
-              const product = item.productId;
-              const discount = calculateDiscount(
-                product.price,
-                product.discountPrice
-              );
-              const hasDiscount = discount > 0;
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            {/* Table Header */}
+            <div className="bg-gray-50 border-b border-gray-200">
+              <div className="grid grid-cols-12 gap-4 px-6 py-4">
+                <div className="col-span-1">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-gray-600 rounded border-gray-300"
+                  />
+                </div>
+                <div className="col-span-3 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                  PRODUCT
+                </div>
+                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                  QUANTITY
+                </div>
+                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                  PRICE
+                </div>
+                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                  STOCK STATUS
+                </div>
+                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                  ACTION
+                </div>
+              </div>
+            </div>
 
-              return (
-                <div
-                  key={item._id}
-                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
-                >
-                  {/* Image Container */}
-                  <div className="relative h-64 overflow-hidden">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+            {/* Table Body */}
+            <div className="divide-y divide-gray-200">
+              {wishlist.map((item: any) => {
+                const product = item.productId;
+                const discount = calculateDiscount(
+                  product.price,
+                  product.discountPrice
+                );
+                const hasDiscount = discount > 0;
+                const quantity = getQuantity(product._id);
 
-                    {/* Discount Badge */}
-                    {hasDiscount && (
-                      <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        -{discount}%
+                return (
+                  <div
+                    key={item._id}
+                    className="grid grid-cols-12 gap-4 px-6 py-6 hover:bg-gray-50"
+                  >
+                    {/* Checkbox */}
+                    <div className="col-span-1 flex items-center">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-gray-600 rounded border-gray-300"
+                      />
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="col-span-3 flex items-center gap-4">
+                      <div className="relative w-16 h-16 flex-shrink-0">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover rounded"
+                        />
                       </div>
-                    )}
+                      <div>
+                        <h3 className="font-medium text-gray-900 mb-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          SKU: {product._id.slice(-8)}
+                        </p>
+                      </div>
+                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <button
-                        onClick={() => handleRemoveFromWishlist(item.productId._id)}
-                        disabled={removeFromWishlistMutation.isPending}
-                        className="bg-white hover:bg-red-50 p-2 rounded-full shadow-md transition-colors"
-                        title="Remove from wishlist"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </button>
+                    {/* Quantity */}
+                    <div className="col-span-2 flex items-center">
+                      <div className="flex items-center border border-gray-300 rounded">
+                        <button
+                          onClick={() =>
+                            updateQuantity(
+                              product._id,
+                              quantity - 1,
+                              product.stock
+                            )
+                          }
+                          className="p-2 hover:bg-gray-100 text-gray-600"
+                          disabled={quantity <= 1}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </button>
+                        <span className="px-4 py-2 border-x border-gray-300 text-center min-w-[60px]">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(
+                              product._id,
+                              quantity + 1,
+                              product.stock
+                            )
+                          }
+                          className="p-2 hover:bg-gray-100 text-gray-600"
+                          disabled={quantity >= product.stock}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="col-span-2 flex items-center">
+                      <div>
+                        {hasDiscount && (
+                          <div className="text-sm text-gray-500 line-through">
+                            ${product.price.toFixed(2)}
+                          </div>
+                        )}
+                        <div className="text-lg font-medium text-red-500">
+                          $
+                          {hasDiscount
+                            ? product.discountPrice.toFixed(2)
+                            : product.price.toFixed(2)}
+                        </div>
+                      </div>
                     </div>
 
                     {/* Stock Status */}
-                    {product.stock <= 5 && product.stock > 0 && (
-                      <div className="absolute bottom-3 left-3 bg-orange-500 text-white text-xs font-medium px-2 py-1 rounded">
-                        Only {product.stock} left
-                      </div>
-                    )}
-
-                    {product.stock === 0 && (
-                      <div className="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded">
-                        Out of Stock
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    <div className="mb-2">
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                        {product.category.name}
-                      </span>
-                    </div>
-
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm">
-                      {product.name}
-                    </h3>
-
-                    <p className="text-gray-600 text-xs mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-
-                    {/* Pricing */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-lg font-bold text-gray-900">
-                        ${hasDiscount ? product.discountPrice : product.price}
-                      </span>
-                      {hasDiscount && (
-                        <span className="text-sm text-gray-500 line-through">
-                          ${product.price}
-                        </span>
+                    <div className="col-span-2 flex items-center">
+                      {product.stock > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <span className="text-sm text-gray-600">
+                            {product.stock} in stock
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                          <span className="text-sm text-red-600">
+                            Out of stock
+                          </span>
+                        </div>
                       )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-2">
+                    {/* Actions */}
+                    <div className="col-span-2 flex items-center gap-2">
                       <button
                         onClick={() => handleAddToCart(product._id)}
-                        disabled={product.stock === 0 || addToCartMutation.isPending}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 px-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                        disabled={
+                          product.stock === 0 ||
+                          addToCartMutation.isPending ||
+                          addedToCart[product._id] // ✅ stays disabled after first add
+                        }
+                        className="bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
                       >
-                        <ShoppingCart className="h-4 w-4" />
-                        {product.stock === 0
-                          ? "Out of Stock"
-                          : addToCartMutation.isPending
-                          ? "Adding..."
-                          : "Add to Cart"}
+                        {addedToCart[product._id] ? "Added" : "Add"}
                       </button>
-
                       <button
                         onClick={() =>
                           (window.location.href = `/products/${product._id}`)
                         }
-                        className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-colors"
-                        title="View details"
+                        className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                        title="View product"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
+                      <button
+                        onClick={() => handleRemoveFromWishlist(product._id)}
+                        disabled={removeFromWishlistMutation.isPending}
+                        className="p-2 text-gray-400 hover:text-red-600 border border-gray-300 rounded"
+                        title="Remove from wishlist"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
