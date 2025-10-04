@@ -10,6 +10,7 @@ import BlogSection from './_components/BlogSection'
 import CTASection from './_components/CTASection'
 import ContactUs from './_components/ContactUs'
 import BecomeSellerSection from './_components/BecomeSeller'
+import BecomeABoy from './_components/BecomeABoy'
 
 function page() {
   return (
@@ -19,8 +20,9 @@ function page() {
         <BeseSellingProdct />
         <NewArrivals />
         <OfferCard />
-        <CustomarReview />
         <BecomeSellerSection />
+        <CustomarReview />
+        <BecomeABoy />
         <BrandSection />
         <ContactUs />
         <CTASection />
