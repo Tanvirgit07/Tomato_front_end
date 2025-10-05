@@ -59,7 +59,7 @@ const MyOrderPage = () => {
     queryKey: ["orders", user?.email],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/payment/singleorderbyemail/${user?.email}`
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/payment/singleorderbyemailfrontend/${user?.email}`
       );
       if (!res.ok) throw new Error("Failed to fetch orders");
       return res.json();
