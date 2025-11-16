@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import OTPForm from './_components/OTPForm'
 
 function page() {
   return (
-    <div>
+    <Suspense fallback={<div>Loading...</div>}>
         <OTPForm />
-    </div>
+    </Suspense>
   )
 }
 

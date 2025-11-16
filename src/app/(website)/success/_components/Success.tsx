@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 async function fetchSession(sessionId: string) {
   const res = await fetch(
@@ -89,12 +90,12 @@ export default function SuccessPage() {
         </div>
 
         <div className="text-center mt-6">
-          <a
+          <Link
             href="/"
             className="inline-block bg-green-600 text-white font-semibold px-6 py-3 rounded-full shadow hover:bg-green-700 transition"
           >
             Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
