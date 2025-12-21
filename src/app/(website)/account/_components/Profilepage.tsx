@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Lock, Camera, Edit3, Mail, ChevronRight, Truck } from "lucide-react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { LogoutModal } from "@/components/modal/Logout";
 
 export default function Profilepage() {
   const [isHovering, setIsHovering] = useState(false);
   const session = useSession();
+  const [open, setOpen] = useState(false);
   const user = session?.data?.user as any; // user info from API
 
   const handlePersonalInfo = () => {
@@ -222,7 +224,7 @@ export default function Profilepage() {
                   {/* Logout Button */}
                   <div className="flex-1">
                     <Button
-                      onClick={() => signOut()}
+                      onClick={() => setOpen(true)}
                       className="w-full h-16 cursor-pointer bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                       size="lg"
                     >
@@ -239,12 +241,18 @@ export default function Profilepage() {
                       </div>
                     </Button>
                   </div>
+
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
+         <LogoutModal
+        open={open}
+        onClose={() => setOpen(false)}
+      />
     </div>
   );
 }
