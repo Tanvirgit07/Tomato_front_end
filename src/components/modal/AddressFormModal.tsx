@@ -12,6 +12,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
+
+const DeliveryMap = dynamic(() => import("@/components/map/CustomarMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 w-full flex items-center justify-center text-gray-500">
+      Loading map...
+    </div>
+  ),
+});
 
 interface HomeDeliveryModalProps {
   open: boolean;
@@ -30,19 +40,25 @@ export default function AddressFormModal({
     address: "",
     city: "",
     postalCode: "",
+    latitude: 23.8103,
+    longitude: 90.4125,
   });
+
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleMapClick = (lat: number, lng: number) => {
+    setFormData((prev) => ({ ...prev, latitude: lat, longitude: lng }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate all fields
-    for (const key in formData) {
+    for (const key of ["fullName", "phone", "address", "city", "postalCode"]) {
       if (!formData[key as keyof typeof formData]) {
         toast.error(`Please enter ${key}`);
         setLoading(false);
@@ -50,61 +66,53 @@ export default function AddressFormModal({
       }
     }
 
-    try {
-      // You can send formData to backend here if needed
-      // const res = await fetch("/api/delivery-info", { method: "POST", body: JSON.stringify(formData) });
+    // ✅ THIS IS THE MAIN FIX
+    const payload = {
+      fullName: formData.fullName,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      postalCode: formData.postalCode,
+      location: {
+        lat: formData.latitude,
+        lng: formData.longitude,
+      },
+    };
 
-      toast.success("Delivery info saved!");
-      onSubmitSuccess(formData);
-      onOpenChange(false);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save delivery info");
-    } finally {
-      setLoading(false);
-    }
+    toast.success("Delivery info saved!");
+    onSubmitSuccess(payload);
+    onOpenChange(false);
+    setLoading(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl max-w-[95vw]">
         <DialogHeader>
           <DialogTitle>Home Delivery Information</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          <Input
-            placeholder="Full Name"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-          />
-          <Input
-            placeholder="Phone Number"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-          <Input
-            placeholder="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-          />
-          <Input
-            placeholder="City"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-          />
-          <Input
-            placeholder="Postal Code"
-            name="postalCode"
-            value={formData.postalCode}
-            onChange={handleChange}
-          />
+          <Input name="fullName" placeholder="Full Name" value={formData.fullName} onChange={handleChange} />
+          <Input name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleChange} />
+          <Input name="address" placeholder="Address" value={formData.address} onChange={handleChange} />
+          <Input name="city" placeholder="City" value={formData.city} onChange={handleChange} />
+          <Input name="postalCode" placeholder="Postal Code" value={formData.postalCode} onChange={handleChange} />
+
+          <div className="mt-4 h-64 rounded-lg overflow-hidden border">
+            <DeliveryMap
+              position={[formData.latitude, formData.longitude]}
+              onMapClick={handleMapClick}
+            />
+          </div>
+
+          <p className="text-xs text-gray-500">
+            Selected Latitude: {formData.latitude.toFixed(5)}, Longitude:{" "}
+            {formData.longitude.toFixed(5)}
+          </p>
 
           <DialogFooter>
-            <Button type="submit" className="w-full bg-yellow-400 hover:bg-yellow-500 text-white">
+            <Button type="submit" className="w-full bg-yellow-400 hover:bg-yellow-500">
               {loading ? "Saving..." : "Save Info"}
             </Button>
           </DialogFooter>
