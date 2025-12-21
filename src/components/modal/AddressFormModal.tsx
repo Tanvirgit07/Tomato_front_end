@@ -14,14 +14,22 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 
-const DeliveryMap = dynamic(() => import("@/components/map/CustomarMap"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-64 w-full flex items-center justify-center text-gray-500">
-      Loading map...
-    </div>
-  ),
-});
+interface DeliveryMapProps {
+  position: [number, number];
+  onMapClick: (lat: number, lng: number) => void;
+}
+
+const DeliveryMap = dynamic<DeliveryMapProps>(
+  () => import("@/components/map/CustomarMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 w-full flex items-center justify-center text-gray-500">
+        Loading map...
+      </div>
+    ),
+  }
+);
 
 interface HomeDeliveryModalProps {
   open: boolean;
