@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react"; // 👈 new import
+import signinImage from "../../../../../public/images/signupImage.jpg"
+import logoGif from "../../../../../public/images/source.gif";
 
 interface FormData {
   email: string;
@@ -67,7 +69,7 @@ const LoginForm = () => {
       {/* Left side - Image */}
       <div className="w-full lg:w-1/2 h-64 lg:h-auto relative">
         <Image
-          src="/images/signupImage.jpg"
+          src={signinImage}
           alt="Sign Up Illustration"
           fill
           className="object-cover"
@@ -77,7 +79,7 @@ const LoginForm = () => {
           <div className="flex items-center space-x-2">
             <div className="h-[70px] w-[70px] flex items-center justify-center">
               <Image
-                src="/images/source.gif"
+                src={logoGif}
                 width={200}
                 height={200}
                 className="object-cover"

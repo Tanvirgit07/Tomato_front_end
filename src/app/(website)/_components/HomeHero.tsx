@@ -2,20 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import food1 from "../../../../public/images/food1.jpg";
+import food2 from "../../../../public/images/food2.jpg";
+import food3 from "../../../../public/images/food3.jpg";
 
 const slides = [
   {
-    image: '/images/food1.jpg',
+    image: food1,
     title: 'Delicious Pizza',
     description: 'Freshly baked with premium ingredients. Perfect for any occasion.',
   },
   {
-    image: '/images/food2.jpg',
+    image: food2,
     title: 'Juicy Burgers',
     description: 'Made with 100% beef, fresh veggies, and special sauce.',
   },
   {
-    image: '/images/food3.jpg',
+    image: food3,
     title: 'Healthy Salads',
     description: 'Fresh, nutritious, and bursting with flavor.',
   },

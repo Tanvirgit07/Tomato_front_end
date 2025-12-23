@@ -137,18 +137,18 @@ export default function BestSellingProduct() {
 
   if (isError)
     return (
-      <div className="flex justify-center items-center h-64 text-lg font-semibold text-red-500">
+      <div className="flex justify-center items-center h-64 text-base sm:text-lg font-semibold text-red-500 px-4">
         Failed to load best-selling products.
       </div>
     );
 
   return (
-    <section className="py-8 sm:py-12 lg:py-10 container mx-auto">
-      <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
+    <section className="py-6 sm:py-8 md:py-10 lg:py-12 xl:py-16 px-4 sm:px-6 lg:px-8 container mx-auto">
+      <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12 xl:mb-16">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight px-4">
           Best Selling Products
         </h2>
-        <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
           Discover the top-selling items that everyone is loving — popular,
           trending, and highly recommended by our community.
         </p>
@@ -156,178 +156,181 @@ export default function BestSellingProduct() {
 
       {isLoading ? (
         // 🟢 Skeleton Carousel
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
-              className="group relative bg-white rounded-3xl overflow-hidden p-4 animate-pulse flex flex-col gap-3"
+              className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden p-3 sm:p-4 animate-pulse flex flex-col gap-3"
             >
               {/* Image Skeleton */}
-              <Skeleton className="w-full h-72 rounded-2xl bg-gray-300" />
+              <Skeleton className="w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-xl sm:rounded-2xl bg-gray-300" />
               {/* Badge Skeleton */}
-              <Skeleton className="w-20 h-5 rounded-full bg-gray-200 absolute top-4 right-4" />
+              <Skeleton className="w-16 sm:w-20 h-4 sm:h-5 rounded-full bg-gray-200 absolute top-3 sm:top-4 right-3 sm:right-4" />
               {/* Heart Skeleton */}
-              <Skeleton className="w-10 h-10 rounded-full bg-gray-200 absolute top-4 left-4" />
+              <Skeleton className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 absolute top-3 sm:top-4 left-3 sm:left-4" />
               {/* Title Skeleton */}
-              <Skeleton className="w-3/4 h-6 rounded-md bg-gray-300 mt-3" />
+              <Skeleton className="w-3/4 h-5 sm:h-6 rounded-md bg-gray-300 mt-2 sm:mt-3" />
               {/* Price Skeleton */}
-              <Skeleton className="w-1/2 h-5 rounded-md bg-gray-300" />
+              <Skeleton className="w-1/2 h-4 sm:h-5 rounded-md bg-gray-300" />
               {/* Add to Cart Skeleton */}
-              <Skeleton className="w-full h-10 rounded-2xl bg-gray-300" />
+              <Skeleton className="w-full h-9 sm:h-10 rounded-xl sm:rounded-2xl bg-gray-300" />
             </div>
           ))}
         </div>
       ) : products?.data?.length === 0 ? (
-        <div className="flex justify-center items-center h-64 bg-gray-100 rounded-2xl">
-          <p className="text-gray-500 text-lg sm:text-xl font-semibold">
+        <div className="flex justify-center items-center h-48 sm:h-56 md:h-64 bg-gray-100 rounded-xl sm:rounded-2xl mx-4">
+          <p className="text-gray-500 text-base sm:text-lg md:text-xl font-semibold px-4 text-center">
             No Products Found 😔
           </p>
         </div>
       ) : (
-        <Carousel
-          opts={{ align: "start", loop: true }}
-          plugins={[Autoplay({ delay: 3000, stopOnInteraction: true })]}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-3 sm:-ml-4">
-            {products?.data
-              ?.filter((product: any) => product.status === "approved")
-              .map((product: any, index: number) => {
-                const cartItem = cartData?.data?.find(
-                  (item: any) => item.productId._id === product._id
-                );
-                const isWishlisted = wishlist.some(
-                  (item: any) => item.productId._id === product._id
-                );
+        <div className="relative px-8 sm:px-10 md:px-12 lg:px-14">
+          <Carousel
+            opts={{ align: "start", loop: true }}
+            plugins={[Autoplay({ delay: 3000, stopOnInteraction: true })]}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 sm:-ml-3 md:-ml-4">
+              {products?.data
+                ?.filter((product: any) => product.status === "approved")
+                .map((product: any, index: number) => {
+                  const cartItem = cartData?.data?.find(
+                    (item: any) => item.productId._id === product._id
+                  );
+                  const isWishlisted = wishlist.some(
+                    (item: any) => item.productId._id === product._id
+                  );
 
-                return (
-                  <CarouselItem
-                    key={product._id}
-                    className="pl-3 sm:pl-4 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4"
-                  >
-                    {/* 🟢 Product Card */}
-                    <div
-                      className={`group relative bg-white rounded-3xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-slate-100 ${
-                        isVisible
-                          ? "opacity-100 translate-y-0"
-                          : "opacity-0 translate-y-4"
-                      }`}
-                      style={{ transitionDelay: `${index * 100}ms` }}
+                  return (
+                    <CarouselItem
+                      key={product._id}
+                      className="pl-2 sm:pl-3 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                     >
-                      {/* Product Image */}
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-
-                        {/* Sales Badge */}
-                        {product.sales > 0 && (
-                          <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold shadow-lg bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black border border-yellow-200">
-                            <Star size={14} className="text-black animate-spin-slow" />
-                            {product.sales} Sold
-                          </div>
-                        )}
-
-                        {/* Wishlist Heart */}
-                        <div
-                          className={`absolute top-4 left-4 z-10 flex items-center justify-center h-10 w-10 rounded-full cursor-pointer shadow-md transition-all duration-300 ${
-                            isWishlisted
-                              ? "bg-red-100 hover:bg-red-200"
-                              : "bg-white hover:bg-red-50"
-                          }`}
-                          onClick={() => {
-                            if (!isWishlisted) {
-                              addToWishlistMutation.mutate(product._id);
-                            } else {
-                              toast.info("Product already in wishlist");
-                            }
-                          }}
-                        >
-                          <Heart
-                            size={22}
-                            className={`transition-all duration-300 ${
-                              isWishlisted
-                                ? "text-red-500 fill-red-500 scale-110"
-                                : "text-red-500 hover:scale-110"
-                            }`}
+                      {/* 🟢 Product Card */}
+                      <div
+                        className={`group relative bg-white rounded-2xl sm:rounded-3xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl ${
+                          isVisible
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-y-4"
+                        }`}
+                        style={{ transitionDelay: `${index * 100}ms` }}
+                      >
+                        {/* Product Image */}
+                        <div className="relative overflow-hidden">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
                           />
-                        </div>
-                      </div>
 
-                      {/* Content */}
-                      <div className="p-6 space-y-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
-                            {product.name}
-                          </h3>
+                          {/* Sales Badge */}
+                          {product.sales > 0 && (
+                            <div className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs font-semibold shadow-lg bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500 text-black border border-yellow-200">
+                              <Star size={12} className="sm:w-3.5 sm:h-3.5 text-black animate-spin-slow" />
+                              <span className="hidden xs:inline">{product.sales} Sold</span>
+                              <span className="xs:hidden">{product.sales}</span>
+                            </div>
+                          )}
+
+                          {/* Wishlist Heart */}
+                          <div
+                            className={`absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-10 flex items-center justify-center h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full cursor-pointer shadow-md transition-all duration-300 ${
+                              isWishlisted
+                                ? "bg-red-100 hover:bg-red-200"
+                                : "bg-white hover:bg-red-50"
+                            }`}
+                            onClick={() => {
+                              if (!isWishlisted) {
+                                addToWishlistMutation.mutate(product._id);
+                              } else {
+                                toast.info("Product already in wishlist");
+                              }
+                            }}
+                          >
+                            <Heart
+                              size={18}
+                              className={`sm:w-5 sm:h-5 md:w-[22px] md:h-[22px] transition-all duration-300 ${
+                                isWishlisted
+                                  ? "text-red-500 fill-red-500 scale-110"
+                                  : "text-red-500 hover:scale-110"
+                              }`}
+                            />
+                          </div>
                         </div>
 
-                        {/* Price + Cart */}
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                ${product.discountPrice?.toFixed(2)}
-                              </span>
-                              <span className="text-slate-400 line-through text-sm">
-                                ${product.price?.toFixed(2)}
-                              </span>
-                            </div>
-                            <div className="text-green-600 text-xs font-medium">
-                              Save $
-                              {(product.price - product.discountPrice).toFixed(2)}
-                            </div>
+                        {/* Content */}
+                        <div className="p-3 sm:p-4 md:p-5 lg:p-6 space-y-3 sm:space-y-4">
+                          <div>
+                            <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-800 line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                              {product.name}
+                            </h3>
                           </div>
 
-                          {/* Cart Controls */}
-                          {cartItem ? (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() =>
-                                  updateQuantityMutation.mutate({
-                                    productId: product._id,
-                                    action: "decrement",
-                                  })
-                                }
-                                className="bg-red-500 text-white px-3 py-1 rounded"
-                              >
-                                <Minus size={16} />
-                              </button>
-                              <span>{cartItem.quantity}</span>
-                              <button
-                                onClick={() =>
-                                  updateQuantityMutation.mutate({
-                                    productId: product._id,
-                                    action: "increment",
-                                  })
-                                }
-                                className="bg-green-500 text-white px-3 py-1 rounded"
-                              >
-                                <Plus size={16} />
-                              </button>
+                          {/* Price + Cart */}
+                          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-2 pt-2">
+                            <div className="space-y-0.5 sm:space-y-1">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                                  ${product.discountPrice?.toFixed(2)}
+                                </span>
+                                <span className="text-slate-400 line-through text-xs sm:text-sm">
+                                  ${product.price?.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="text-green-600 text-xs font-medium">
+                                Save $
+                                {(product.price - product.discountPrice).toFixed(2)}
+                              </div>
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => addToCartMutation.mutate(product._id)}
-                              className="bg-gradient-to-r from-orange-500 to-red-400 text-white px-4 py-2 rounded-2xl text-sm font-medium"
-                            >
-                              Add to Cart
-                            </button>
-                          )}
+
+                            {/* Cart Controls */}
+                            {cartItem ? (
+                              <div className="flex items-center gap-1.5 sm:gap-2">
+                                <button
+                                  onClick={() =>
+                                    updateQuantityMutation.mutate({
+                                      productId: product._id,
+                                      action: "decrement",
+                                    })
+                                  }
+                                  className="bg-red-500 text-white px-2 sm:px-3 py-1 rounded hover:bg-red-600 transition-colors"
+                                >
+                                  <Minus size={14} className="sm:w-4 sm:h-4" />
+                                </button>
+                                <span className="text-sm sm:text-base font-medium min-w-[20px] sm:min-w-[24px] text-center">{cartItem.quantity}</span>
+                                <button
+                                  onClick={() =>
+                                    updateQuantityMutation.mutate({
+                                      productId: product._id,
+                                      action: "increment",
+                                    })
+                                  }
+                                  className="bg-green-500 text-white px-2 sm:px-3 py-1 rounded hover:bg-green-600 transition-colors"
+                                >
+                                  <Plus size={14} className="sm:w-4 sm:h-4" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => addToCartMutation.mutate(product._id)}
+                                className="bg-gradient-to-r from-orange-500 to-red-400 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium hover:from-orange-600 hover:to-red-500 transition-all duration-300 shadow-md hover:shadow-lg whitespace-nowrap"
+                              >
+                                Add to Cart
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CarouselItem>
-                );
-              })}
-          </CarouselContent>
+                    </CarouselItem>
+                  );
+                })}
+            </CarouselContent>
 
-          {/* Navigation Arrows */}
-          <CarouselPrevious className="absolute -left-6 sm:-left-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2" />
-          <CarouselNext className="absolute -right-6 sm:-right-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2" />
-        </Carousel>
+            {/* Navigation Arrows */}
+            <CarouselPrevious className="absolute -left-4 sm:-left-6 md:-left-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2" />
+            <CarouselNext className="absolute -right-4 sm:-right-6 md:-right-8 top-1/2 -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-400 text-white w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full shadow-lg hover:from-orange-600 hover:to-red-700 transition-all duration-300 border-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2" />
+          </Carousel>
+        </div>
       )}
     </section>
   );

@@ -4,6 +4,7 @@ import React from "react";
 import { Bike } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import delivaryImae from "../../../../public/images/delivary.jpg"
 
 const BecomeABoy = () => {
   return (
@@ -32,7 +33,7 @@ const BecomeABoy = () => {
         <div className="md:w-1/2 flex justify-center">
           <div className="relative w-[350px] h-[250px] md:w-[400px] md:h-[300px] rounded-xl overflow-hidden shadow-xl hover:scale-105 transition-transform duration-300">
             <Image
-              src="/images/delivary.jpg"
+              src={delivaryImae}
               alt="Become a Delivery Agent"
               fill
               className="object-cover"

@@ -17,6 +17,7 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import gifNavbar from "../../../public/images/source.gif";
 
 // Define interfaces for better TypeScript support
 interface User {
@@ -172,7 +173,7 @@ const Navbar = () => {
               <div className="relative h-[50px] w-[50px] flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-full opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
                 <Image
-                  src="/images/source.gif"
+                  src={gifNavbar}
                   width={45}
                   height={45}
                   className="object-cover rounded-full relative z-10 group-hover:scale-110 transition-transform duration-300"

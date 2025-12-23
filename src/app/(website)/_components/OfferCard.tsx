@@ -46,7 +46,7 @@ export default function SimpleOfferGallery() {
 
   if (isError)
     return (
-      <p className="text-center text-red-500 mt-16">
+      <p className="text-center text-red-500 mt-16 px-4">
         {error instanceof Error ? error.message : "Something went wrong"}
       </p>
     );
@@ -64,53 +64,53 @@ export default function SimpleOfferGallery() {
   const displayedProducts = showAll ? allProducts : allProducts.slice(0, 8);
 
   return (
-    <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 py-16">
+    <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 py-8 sm:py-12 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-red-100 px-6 py-3 rounded-full mb-6">
+        <div className="text-center mb-8 sm:mb-12 md:mb-16">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-100 to-red-100 px-4 sm:px-6 py-2 sm:py-3 rounded-full mb-4 sm:mb-6">
             <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-            <span className="text-orange-700 font-semibold text-sm uppercase tracking-wide">
+            <span className="text-orange-700 font-semibold text-xs sm:text-sm uppercase tracking-wide">
               Limited Time Only
             </span>
           </div>
 
-          <h2 className="text-5xl font-bold mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 px-4">
             <span className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 bg-clip-text text-transparent">
               Exclusive
             </span>
-            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent ml-3">
+            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent ml-2 sm:ml-3">
               Offers
             </span>
           </h2>
 
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-slate-600 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed px-4">
             Don&apos;t miss out on these incredible deals. Premium products at
             prices that won&apos;t last long.
           </p>
         </div>
 
         {/* Grid of offer images */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
           {isLoading
             ? // Skeleton Loading for 6 items
               Array.from({ length: 6 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="group relative rounded-3xl overflow-hidden shadow-lg animate-pulse bg-white flex flex-col"
+                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg animate-pulse bg-white flex flex-col"
                 >
-                  <div className="w-full h-80 bg-gray-300 rounded-3xl" />
-                  <div className="p-4 flex flex-col gap-2">
-                    <div className="h-6 bg-gray-300 rounded-md w-3/4" />
-                    <div className="h-4 bg-gray-200 rounded-md w-1/2" />
-                    <div className="h-10 bg-gray-300 rounded-2xl mt-2" />
+                  <div className="w-full h-64 sm:h-72 md:h-80 bg-gray-300 rounded-2xl sm:rounded-3xl" />
+                  <div className="p-3 sm:p-4 flex flex-col gap-2">
+                    <div className="h-5 sm:h-6 bg-gray-300 rounded-md w-3/4" />
+                    <div className="h-3 sm:h-4 bg-gray-200 rounded-md w-1/2" />
+                    <div className="h-8 sm:h-10 bg-gray-300 rounded-xl sm:rounded-2xl mt-2" />
                   </div>
                 </div>
               ))
             : displayedProducts.map((item: any, index: number) => (
                 <div
                   key={item._id}
-                  className="group relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 cursor-pointer"
+                  className="group relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-3 cursor-pointer"
                   onMouseEnter={() => setHoveredItem(item._id)}
                   onMouseLeave={() => setHoveredItem(null)}
                   style={{
@@ -124,41 +124,41 @@ export default function SimpleOfferGallery() {
                       height={300}
                       src={item.offer.image || ""}
                       alt={item.name}
-                      className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-64 sm:h-72 md:h-80 object-cover group-hover:scale-110 transition-transform duration-700"
                     />
 
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
 
                     {/* Discount Badge */}
-                    <div className="absolute top-4 right-4 z-10">
+                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4 z-10">
                       <div className="relative">
-                        <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-2xl font-bold text-lg shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                        <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                           {item.offer.discountPercentage}% OFF
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl blur-lg opacity-50 -z-10 animate-pulse"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl sm:rounded-2xl blur-lg opacity-50 -z-10 animate-pulse"></div>
                       </div>
                     </div>
 
                     {/* Content Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                      <h3 className="text-xl font-bold mb-2 group-hover:text-orange-300 transition-colors">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 text-white transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2 group-hover:text-orange-300 transition-colors line-clamp-2">
                         {item.name}
                       </h3>
-                      <p className="text-sm opacity-90 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs sm:text-sm opacity-90 group-hover:opacity-100 transition-opacity line-clamp-2">
                         {item.offer.description}
                       </p>
 
                       {/* Shop Now Button */}
                       <div
-                        className={`mt-4 transform transition-all duration-300 ${
+                        className={`mt-3 sm:mt-4 transform transition-all duration-300 ${
                           hoveredItem === item._id
                             ? "translate-y-0 opacity-100"
                             : "translate-y-4 opacity-0"
                         }`}
                       >
                         <Link href={`/products/${item._id}`}>
-                          <button className="bg-white text-slate-900 px-6 py-3 rounded-2xl font-semibold hover:bg-orange-50 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                          <button className="bg-white text-slate-900 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-sm sm:text-base font-semibold hover:bg-orange-50 transition-all duration-300 transform hover:scale-105 shadow-lg">
                             Shop Now
                             <span className="ml-2">→</span>
                           </button>
@@ -170,9 +170,9 @@ export default function SimpleOfferGallery() {
               ))}
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-8 sm:mt-12">
           <Link href={"/offer"}>
-            <button className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
+            <button className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base rounded-full font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
               showAll
             </button>
           </Link>
