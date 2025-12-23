@@ -166,7 +166,7 @@ const Navbar = () => {
       </div>
 
       <div className="container mx-auto">
-        <div className="flex justify-between items-center h-16 md:h-20 relative">
+        <div className="flex justify-between items-center h-16 md:h-20 relative px-2">
           {/* Logo */}
           <div className="flex-shrink-0 z-20">
             <Link href="/" className="flex items-center gap-3 group">
