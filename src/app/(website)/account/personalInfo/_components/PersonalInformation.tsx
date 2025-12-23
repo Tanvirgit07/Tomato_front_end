@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -18,14 +19,20 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { UserCircleIcon, CameraIcon } from "lucide-react";
+import Image from "next/image";
 
 // Zod schema
 const personalInfoSchema = z.object({
-  name: z.string().min(2).max(50).trim(),
-  email: z.string().email().trim().toLowerCase(),
-  phoneNumber: z.string().min(10).trim(),
-  profileImageFile: z.any().optional(),
-  bio: z.string().max(200).optional(),
+  name: z.string().min(2, "Name must be at least 2 characters").max(50).trim(),
+  email: z.string().email("Invalid email address").trim().toLowerCase(),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").trim(),
+  profileImageFile: z
+    .any()
+    .optional()
+    .refine((file) => !file || (file instanceof File && file.type.startsWith("image/")), "Must be an image file")
+    .refine((file) => !file || file.size <= 5 * 1024 * 1024, "Max file size is 5MB"),
+  bio: z.string().max(200, "Bio must be at most 200 characters").optional(),
   address: z.object({
     street: z.string().optional(),
     city: z.string().optional(),
@@ -196,28 +203,38 @@ const PersonalInformation: React.FC = () => {
 
   if (status === "loading" || (isLoading && !getSingleUser)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (status === "unauthenticated") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <h2 className="text-2xl font-semibold mb-2">Authentication Required</h2>
-        <p className="mb-4">Please log in to update your profile.</p>
-        <Button onClick={() => (window.location.href = "/auth/signin")}>Go to Sign In</Button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center px-4 sm:px-6">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Authentication Required</h2>
+        <p className="text-gray-600 mb-6 max-w-md">Please sign in to access and update your profile information.</p>
+        <Button 
+          onClick={() => (window.location.href = "/auth/signin")}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full shadow-md text-lg"
+        >
+          Sign In Now
+        </Button>
       </div>
     );
   }
 
   if (error && !getSingleUser) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
-        <h2 className="text-2xl font-semibold mb-2">Error Loading Profile</h2>
-        <p className="mb-4">{error.message}</p>
-        <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["singleUser", userId] })}>Retry</Button>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center px-4 sm:px-6">
+        <h2 className="text-3xl font-bold text-red-600 mb-4">Error Loading Profile</h2>
+        <p className="text-gray-600 mb-6 max-w-md">{error.message}</p>
+        <Button 
+          onClick={() => queryClient.invalidateQueries({ queryKey: ["singleUser", userId] })}
+          className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full shadow-md text-lg"
+        >
+          Retry Loading
+        </Button>
       </div>
     );
   }
@@ -225,110 +242,138 @@ const PersonalInformation: React.FC = () => {
   const currentUser = getSingleUser?.user || user;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50 sm:px-6 lg:px-8 py-[70px]">
+      <div className="bg-white border border-indigo-100 overflow-hidden container mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-100 flex items-center gap-6">
-          <div className="relative w-20 h-20 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center overflow-hidden">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 sm:px-8 py-8 flex flex-col sm:flex-row items-center gap-6">
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-full flex items-center justify-center overflow-hidden shadow-md ring-4 ring-white/20">
             {imagePreview ? (
-              <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+              <Image width={300} height={300} src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
             ) : (
-              <div className="text-white text-2xl font-semibold">
-                {currentUser?.name?.charAt(0).toUpperCase()}
-              </div>
+              <UserCircleIcon className="w-16 h-16 sm:w-20 sm:h-20 text-indigo-300" />
             )}
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">✓</div>
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-1">Update Personal Details</h2>
-            <p className="text-gray-500 text-sm">Keep your profile information up to date</p>
-            {currentUser?.name && <p className="text-blue-600 text-sm font-medium">Welcome back, {currentUser.name}!</p>}
+          <div className="text-center sm:text-left">
+            <h2 className="text-3xl font-bold text-white mb-2">Personal Profile Settings</h2>
+            <p className="text-indigo-100 text-base">Update your details to keep your account secure and personalized.</p>
+            {currentUser?.name && <p className="text-yellow-200 text-lg font-medium mt-2">Hello, {currentUser.name}!</p>}
           </div>
         </div>
 
         {/* Form */}
-        <div className="px-8 py-8">
+        <div className="px-6 sm:px-8 py-8 sm:py-10">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Name & Email */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Full Name" disabled={updateUserMutation.isPending} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email*</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="Email" disabled={updateUserMutation.isPending} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Phone & Profile Image */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number*</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Phone Number" disabled={updateUserMutation.isPending} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="profileImageFile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Profile Image (Max 5MB)</FormLabel>
-                      <FormControl>
-                        <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files?.[0])} disabled={updateUserMutation.isPending} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Bio */}
-              <FormField
-                control={form.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio ({(field.value || "").length}/200)</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="About you" maxLength={200} disabled={updateUserMutation.isPending} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Address */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium border-b border-gray-200 pb-2">Address Information</h3>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Personal Details Section */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 border-b border-indigo-100 pb-3">Personal Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Full Name *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter your full name" 
+                            disabled={updateUserMutation.isPending} 
+                            className="border-indigo-200 focus:border-indigo-500 rounded-xl" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Email Address *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            disabled={updateUserMutation.isPending} 
+                            className="border-indigo-200 focus:border-indigo-500 rounded-xl" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="phoneNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Phone Number *</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter your phone number" 
+                            disabled={updateUserMutation.isPending} 
+                            className="border-indigo-200 focus:border-indigo-500 rounded-xl" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="profileImageFile"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Profile Image (Max 5MB)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input 
+                              type="file" 
+                              accept="image/*" 
+                              onChange={(e) => field.onChange(e.target.files?.[0])} 
+                              disabled={updateUserMutation.isPending} 
+                              className="border-indigo-200 focus:border-indigo-500 rounded-xl file:bg-indigo-100 file:text-indigo-600 file:rounded-full file:px-4 file:py-2 file:mr-4" 
+                            />
+                            <CameraIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-500 pointer-events-none" />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="bio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Bio (Optional, Max 200 characters)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Tell us about yourself..." 
+                          maxLength={200} 
+                          disabled={updateUserMutation.isPending} 
+                          className="border-indigo-200 focus:border-indigo-500 rounded-xl min-h-[100px]" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <p className="text-sm text-gray-500 text-right mt-1">{(field.value || "").length}/200</p>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Address Section */}
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold text-gray-800 border-b border-indigo-100 pb-3">Address Information (Optional)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {["street", "city", "country", "zip"].map((fieldName) => (
                     <FormField
                       key={fieldName}
@@ -336,11 +381,18 @@ const PersonalInformation: React.FC = () => {
                       name={`address.${fieldName}` as any}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}</FormLabel>
+                          <FormLabel className="text-gray-700 font-medium">
+                            {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+                          </FormLabel>
                           <FormControl>
-                            <Input placeholder={fieldName} disabled={updateUserMutation.isPending} {...field} />
+                            <Input 
+                              placeholder={`Enter your ${fieldName}`} 
+                              disabled={updateUserMutation.isPending} 
+                              className="border-indigo-200 focus:border-indigo-500 rounded-xl" 
+                              {...field} 
+                            />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -348,10 +400,14 @@ const PersonalInformation: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit */}
-              <div className="pt-6 border-t border-gray-100">
-                <Button type="submit" disabled={updateUserMutation.isPending}>
-                  {updateUserMutation.isPending ? "Updating..." : "Update Profile"}
+              {/* Submit Button */}
+              <div className="pt-6 border-t border-indigo-100 flex justify-end">
+                <Button 
+                  type="submit" 
+                  disabled={updateUserMutation.isPending}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full shadow-md text-lg font-semibold"
+                >
+                  {updateUserMutation.isPending ? "Updating Profile..." : "Save Changes"}
                 </Button>
               </div>
             </form>

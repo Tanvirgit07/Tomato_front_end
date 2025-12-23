@@ -55,10 +55,10 @@ function AllReview() {
     );
 
   return (
-    <div className="py-16 bg-gray-50">
+    <div className="py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Simple Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Customer Reviews
           </h2>

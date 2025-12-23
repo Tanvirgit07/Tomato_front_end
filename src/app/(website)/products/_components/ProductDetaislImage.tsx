@@ -4,11 +4,12 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart, Plus, Minus, Tag, Package, Star } from "lucide-react";
 
 interface SubImage {
   url: string;
@@ -68,6 +69,11 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
       `Sub-Category: ${productData.subCategory?.name || "Standard"}`,
     ],
   };
+
+  // Calculate discount percentage
+  const discountPercentage = displayData.originalPrice && displayData.originalPrice !== displayData.price
+    ? Math.round(((displayData.originalPrice - displayData.price) / displayData.originalPrice) * 100)
+    : 0;
 
   // Fetch Cart Data
   const { data: cartData } = useQuery({
@@ -172,135 +178,213 @@ const ProductDetailsImage: React.FC<ProductDetailsImageProps> = ({
   });
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 bg-white lg:mt-[83px] md:mt-[60px] mt-[40px] lg:mb-[40px] md:mb-[30px] mb-[20px]">
-      <div className="flex flex-col lg:flex-row justify-between items-start gap-6 sm:gap-8 lg:gap-[100px]">
-        {/* Image Gallery */}
-        <div className="flex flex-col gap-3 sm:gap-4 w-full sm:max-w-[600px]">
-          <Card className="overflow-hidden w-full h-full">
-            <CardContent className="p-0">
-              <Image
-                width={400}
-                height={400}
-                src={displayData.images[selectedImage].src}
-                alt={displayData.images[selectedImage].alt}
-                className="w-full h-[200px] sm:h-[300px] object-cover"
-              />
-            </CardContent>
-          </Card>
-
-          <div className="flex flex-row gap-[20px] overflow-x-auto">
-            {displayData.images.map((image) => (
-              <Card
-                key={image.id}
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0 ${
-                  selectedImage === image.id ? "ring-2 ring-blue-500" : ""
-                }`}
-                onClick={() => setSelectedImage(image.id)}
-              >
-                <CardContent className="p-0">
+    <div className="w-full lg:mt-20 md:mt-16 mt-10 lg:mb-10 md:mb-8 mb-5">
+      <div className="container mx-auto sm:px-6 lg:px-8 sm:py-8 lg:py-10">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-8 sm:gap-10 lg:gap-16">
+          {/* Image Gallery */}
+          <div className="flex flex-col gap-4 sm:gap-5 w-full lg:w-1/2 lg:max-w-[550px]">
+            <Card className="overflow-hidden w-full border-2 border-gray-200 duration-300 relative group">
+              {discountPercentage > 0 && (
+                <Badge className="absolute top-4 left-4 z-10 bg-gradient-to-r from-red-500 to-pink-600 text-white px-3 py-1.5 text-sm font-bold shadow-lg animate-pulse">
+                  <Tag className="w-4 h-4 mr-1 inline" />
+                  {discountPercentage}% OFF
+                </Badge>
+              )}
+              <CardContent className="p-0">
+                <div className="relative w-full aspect-square sm:aspect-video lg:aspect-[4/3] bg-white">
                   <Image
-                    width={300}
-                    height={300}
-                    src={image.src}
-                    alt={image.alt}
-                    className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-md"
+                    fill
+                    src={displayData.images[selectedImage].src}
+                    alt={displayData.images[selectedImage].alt}
+                    className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 550px"
+                    priority
                   />
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex flex-row gap-2.5 sm:gap-3 lg:gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-100">
+              {displayData.images.map((image) => (
+                <Card
+                  key={image.id}
+                  className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 flex-shrink-0 border-2 ${
+                    selectedImage === image.id 
+                      ? "ring-4 ring-blue-500 border-blue-500 shadow-lg" 
+                      : "border-gray-200 hover:border-blue-300"
+                  }`}
+                  onClick={() => setSelectedImage(image.id)}
+                >
+                  <CardContent className="p-1">
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white">
+                      <Image
+                        fill
+                        src={image.src}
+                        alt={image.alt}
+                        className="object-contain p-1 rounded"
+                        sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 96px"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Product Details */}
-        <div className="space-y-6 flex-1 w-full">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-            {displayData.title}
-          </h1>
-
-          {/* Features */}
-          <div className="space-y-2">
-            {displayData.features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <span className="w-3 h-3 bg-blue-500 rounded-full inline-block"></span>
-                <span className="text-base sm:text-lg text-gray-700 font-medium">
-                  {feature}
-                </span>
+          {/* Product Details */}
+          <div className="space-y-5 sm:space-y-6 lg:space-y-7 flex-1 w-full lg:w-1/2">
+            {/* Title */}
+            <div className="space-y-3">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight break-words bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text">
+                {displayData.title}
+              </h1>
+              
+              {/* Rating Stars (Mock) */}
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-600 font-medium">(4.5 Rating)</span>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* Price */}
-          <div className="py-4">
-            <div className="flex items-center gap-4">
-              <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">
-                ${displayData.price.toFixed(2)}
-              </span>
-              {displayData.originalPrice &&
-                displayData.originalPrice !== displayData.price && (
-                  <span className="text-lg sm:text-xl text-gray-400 line-through">
-                    ${displayData.originalPrice.toFixed(2)}
+            {/* Features/Categories */}
+            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-none">
+              <CardContent className="p-4 sm:p-5">
+                <div className="space-y-3">
+                  {displayData.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3 group">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <Package className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-sm sm:text-base lg:text-lg text-gray-800 font-semibold break-words">
+                        {feature}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Price Section */}
+            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200">
+              <CardContent className="p-5 sm:p-6">
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600 font-medium">Price</p>
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                    <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-green-600">
+                      ${displayData.price.toFixed(2)}
+                    </span>
+                    {displayData.originalPrice &&
+                      displayData.originalPrice !== displayData.price && (
+                        <div className="flex flex-col">
+                          <span className="text-lg sm:text-xl lg:text-2xl text-gray-400 line-through font-semibold">
+                            ${displayData.originalPrice.toFixed(2)}
+                          </span>
+                          <span className="text-xs sm:text-sm text-green-600 font-bold">
+                            You save ${(displayData.originalPrice - displayData.price).toFixed(2)}!
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions: Wishlist & Cart */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                {/* Wishlist Button */}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className={`transition-all duration-300 border-2 group hover:scale-105 ${
+                    isWishlisted
+                      ? "bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                      : "border-gray-300 hover:border-red-300 hover:bg-red-50"
+                  }`}
+                  onClick={() => {
+                    if (!isWishlisted) addToWishlistMutation.mutate(displayData.id);
+                    else toast.info("Already in wishlist");
+                  }}
+                >
+                  <Heart
+                    className={`w-5 h-5 mr-2 transition-all duration-300 ${
+                      isWishlisted ? "fill-red-500 text-red-500" : "group-hover:fill-red-400"
+                    }`}
+                  />
+                  <span className="font-semibold">
+                    {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
                   </span>
+                </Button>
+
+                {/* Cart Actions */}
+                {cartItem ? (
+                  <Card className="flex-1 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-gray-300">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <Button
+                          size="icon"
+                          onClick={() =>
+                            updateQuantityMutation.mutate({
+                              productId: displayData.id,
+                              action: "decrement",
+                            })
+                          }
+                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg h-10 w-10 shadow-md hover:scale-110 transition-all"
+                        >
+                          <Minus className="w-5 h-5" />
+                        </Button>
+                        
+                        <div className="flex flex-col items-center">
+                          <span className="text-xs text-gray-600 font-medium">Quantity</span>
+                          <span className="text-2xl font-bold text-gray-900">
+                            {cartItem.quantity}
+                          </span>
+                        </div>
+                        
+                        <Button
+                          size="icon"
+                          onClick={() =>
+                            updateQuantityMutation.mutate({
+                              productId: displayData.id,
+                              action: "increment",
+                            })
+                          }
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg h-10 w-10 shadow-md hover:scale-110 transition-all"
+                        >
+                          <Plus className="w-5 h-5" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Button
+                    size="lg"
+                    className="flex-1 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white font-bold py-4 sm:py-5 lg:py-6 duration-300 text-base sm:text-lg lg:text-xl"
+                    onClick={() => addToCartMutation.mutate(displayData.id)}
+                  >
+                    <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                    Add to Cart
+                  </Button>
                 )}
-            </div>
-          </div>
-
-          {/* Actions: Wishlist & Cart */}
-          <div className="flex items-center gap-5">
-            {/* Wishlist */}
-            <div
-              className={`cursor-pointer p-3 rounded-full transition-transform duration-300 ${
-                isWishlisted
-                  ? "bg-red-100 scale-110 hover:bg-red-200"
-                  : "bg-gray-100 hover:scale-110"
-              } shadow-md`}
-              onClick={() => {
-                if (!isWishlisted) addToWishlistMutation.mutate(displayData.id);
-                else toast.info("Already in wishlist");
-              }}
-            >
-              <Heart
-                size={26}
-                className={`transition-all duration-300 ${
-                  isWishlisted ? "text-red-500 fill-red-500" : "text-gray-500"
-                }`}
-              />
-            </div>
-
-            {/* Add to Cart / Quantity Controls */}
-            {cartItem ? (
-              <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg shadow-md">
-                <button
-                  onClick={() =>
-                    updateQuantityMutation.mutate({
-                      productId: displayData.id,
-                      action: "decrement",
-                    })
-                  }
-                  className="bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600 transition"
-                >
-                  -
-                </button>
-                <span className="font-semibold px-2">{cartItem.quantity}</span>
-                <button
-                  onClick={() =>
-                    updateQuantityMutation.mutate({
-                      productId: displayData.id,
-                      action: "increment",
-                    })
-                  }
-                  className="bg-green-500 text-white px-4 py-1 rounded-lg hover:bg-green-600 transition"
-                >
-                  +
-                </button>
               </div>
-            ) : (
-              <Button
-                className="bg-gradient-to-r w-full from-blue-500 to-purple-600 text-white font-semibold py-3 px-7 rounded-lg hover:scale-105 transition-transform shadow-lg"
-                onClick={() => addToCartMutation.mutate(displayData.id)}
-              >
-                Add to Cart
-              </Button>
-            )}
+
+              {/* Additional Info */}
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1.5 border-green-300 text-green-700 bg-green-50">
+                  ✓ In Stock
+                </Badge>
+                <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1.5 border-blue-300 text-blue-700 bg-blue-50">
+                  🚚 Free Shipping
+                </Badge>
+                <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1.5 border-purple-300 text-purple-700 bg-purple-50">
+                  🔒 Secure Payment
+                </Badge>
+              </div>
+            </div>
           </div>
         </div>
       </div>

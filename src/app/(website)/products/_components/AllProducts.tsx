@@ -210,7 +210,7 @@ export default function AllProducts() {
                 key={idx}
                 className="bg-white rounded-2xl sm:rounded-3xl shadow-lg p-3 sm:p-4 animate-pulse flex flex-col gap-3 sm:gap-4"
               >
-                <Skeleton className="w-full h-56 sm:h-60 md:h-64 rounded-xl sm:rounded-2xl bg-gray-300" />
+                <Skeleton className="w-full h-56 sm:h-60 md:h-64 bg-gray-300" />
                 <Skeleton className="w-3/4 h-5 sm:h-6 rounded-md bg-gray-300" />
                 <Skeleton className="w-1/2 h-4 sm:h-5 rounded-md bg-gray-300" />
                 <Skeleton className="w-full h-9 sm:h-10 rounded-xl sm:rounded-2xl bg-gray-300" />
@@ -238,7 +238,7 @@ export default function AllProducts() {
               return (
                 <div
                   key={p._id}
-                  className={`group relative bg-white rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100`}
+                  className={`group relative bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100`}
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
                   <div className="relative overflow-hidden">

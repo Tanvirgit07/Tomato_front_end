@@ -172,10 +172,10 @@ export default function NewArrivalProducts() {
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
-              className="group relative rounded-2xl sm:rounded-3xl overflow-hidden p-3 sm:p-4 animate-pulse flex flex-col gap-3 bg-white border border-slate-100"
+              className="group relative overflow-hidden p-3 sm:p-4 animate-pulse flex flex-col gap-3 bg-white border border-slate-100"
             >
               {/* Image Skeleton */}
-              <Skeleton className="w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-xl sm:rounded-2xl bg-gray-300" />
+              <Skeleton className="w-full h-48 sm:h-56 md:h-64 lg:h-60  bg-gray-300" />
               {/* Discount badge skeleton */}
               <Skeleton className="w-14 sm:w-16 h-4 sm:h-5 rounded-full bg-gray-200 absolute top-3 sm:top-4 left-3 sm:left-4" />
               {/* Wishlist skeleton */}
@@ -220,7 +220,7 @@ export default function NewArrivalProducts() {
                     className="pl-2 sm:pl-3 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                   >
                     <div
-                      className={`group relative rounded-2xl sm:rounded-3xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl ${
+                      className={`group relative  transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl ${
                         isVisible
                           ? "opacity-100 translate-y-0"
                           : "opacity-0 translate-y-4"
@@ -232,7 +232,7 @@ export default function NewArrivalProducts() {
                         <img
                           src={product.image}
                           alt={product.name}
-                          className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                          className="w-full h-48 sm:h-56 md:h-64 lg:h-60 object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                         {/* Discount Badge */}
                         <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4">
@@ -281,7 +281,7 @@ export default function NewArrivalProducts() {
                         </div>
 
                         {/* Price & Cart */}
-                        <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-2 pt-2">
+                        <div className="flex xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-2 pt-2">
                           <div className="space-y-0.5 sm:space-y-1">
                             <div className="flex items-center gap-2 sm:gap-3">
                               <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">

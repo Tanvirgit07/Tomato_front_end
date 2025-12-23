@@ -53,8 +53,6 @@ const CustomerReviewsForm: React.FC<CustomerReviewsFormProps> = ({ productData }
   const {
     control,
     handleSubmit,
-    setValue,
-    watch,
     reset,
     formState: { errors },
   } = useForm<ReviewFormData>({
@@ -101,7 +99,6 @@ const CustomerReviewsForm: React.FC<CustomerReviewsFormProps> = ({ productData }
     },
   });
 
-  // Submit Handler
   const onSubmit = (formData: ReviewFormData) => {
     const reviewData = {
       user: userId,
@@ -112,87 +109,87 @@ const CustomerReviewsForm: React.FC<CustomerReviewsFormProps> = ({ productData }
     createReviewMutation.mutate(reviewData);
   };
 
-  // Render stars
   const renderStars = (value: number, onChange: (val: number) => void) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      const isActive = i <= (hoveredRating || value);
-      stars.push(
+    return Array.from({ length: 5 }, (_, i) => {
+      const starValue = i + 1;
+      const isActive = starValue <= (hoveredRating || value);
+
+      return (
         <button
-          key={i}
+          key={starValue}
           type="button"
-          aria-label={`${i} star`}
-          className="focus:outline-none"
-          onClick={() => onChange(i)}
-          onMouseEnter={() => setHoveredRating(i)}
+          onClick={() => onChange(starValue)}
+          onMouseEnter={() => setHoveredRating(starValue)}
           onMouseLeave={() => setHoveredRating(0)}
+          className="focus:outline-none transition-all duration-200 hover:scale-110"
         >
           <Star
-            className={`w-5 h-5 transition-colors duration-200 ${
+            className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 ${
               isActive
-                ? "fill-yellow-400 text-yellow-400"
-                : "fill-none text-gray-300 hover:text-yellow-400"
-            }`}
+                ? "fill-yellow-400 text-yellow-400 drop-shadow-md"
+                : "fill-transparent text-gray-300 hover:text-yellow-400"
+            } transition-colors`}
           />
         </button>
       );
-    }
-    return stars;
+    });
   };
 
   return (
-    <div className="container mx-auto px-4 bg-white lg:mb-[58px] md:mb-[43px] mb-[38px]">
-      <div className="space-y-6">
-        <h1 className="lg:text-[32px] md:text-[28px] text-[20px] font-semibold leading-[120%] mb-8">
-          Customer Reviews
-        </h1>
+    <div className="w-full bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 md:p-10 lg:p-12">
+      <div className="max-w-3xl mx-auto">
+        {/* Header */}
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8 sm:mb-10 text-center sm:text-left">
+          Write a Review
+        </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-7 sm:space-y-8">
           {/* Rating */}
           <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">
-              Your Rating *
+            <label className="text-base sm:text-lg font-semibold text-gray-800">
+              Your Rating <span className="text-red-500">*</span>
             </label>
             <Controller
               name="rating"
               control={control}
               render={({ field }) => (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2 sm:gap-3 justify-start">
                   {renderStars(field.value, field.onChange)}
                 </div>
               )}
             />
             {errors.rating && (
-              <p className="text-red-500 text-sm">{errors.rating.message}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.rating.message}</p>
             )}
           </div>
 
-          {/* Review */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              Your Review *
+          {/* Review Text */}
+          <div className="space-y-3">
+            <label className="text-base sm:text-lg font-semibold text-gray-800">
+              Your Review <span className="text-red-500">*</span>
             </label>
             <Controller
               name="review"
               control={control}
               render={({ field }) => (
                 <Textarea
-                  placeholder={`Share your thoughts about ${productData.name}...`}
+                  placeholder={`Share your experience with ${productData.name}...`}
                   {...field}
-                  className="min-h-[120px] resize-none border-gray-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-400"
+                  rows={5}
+                  className="w-full resize-none rounded-xl border-gray-300 focus:border-red-500 focus:ring-4 focus:ring-red-100 text-base placeholder:text-gray-400 px-5 py-4"
                 />
               )}
             />
             {errors.review && (
-              <p className="text-red-500 text-sm">{errors.review.message}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.review.message}</p>
             )}
           </div>
 
-          {/* Name + Email */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Name *
+          {/* Name & Email */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="text-base sm:text-lg font-semibold text-gray-800">
+                Name <span className="text-red-500">*</span>
               </label>
               <Controller
                 name="name"
@@ -200,20 +197,20 @@ const CustomerReviewsForm: React.FC<CustomerReviewsFormProps> = ({ productData }
                 render={({ field }) => (
                   <Input
                     type="text"
-                    placeholder="Your Name"
+                    placeholder="Enter your name"
                     {...field}
-                    className="border-gray-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-400 h-[51px]"
+                    className="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-4 focus:ring-red-100 h-12 px-5 text-base"
                   />
                 )}
               />
               {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
               )}
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Email *
+            <div className="space-y-3">
+              <label className="text-base sm:text-lg font-semibold text-gray-800">
+                Email <span className="text-red-500">*</span>
               </label>
               <Controller
                 name="email"
@@ -221,20 +218,20 @@ const CustomerReviewsForm: React.FC<CustomerReviewsFormProps> = ({ productData }
                 render={({ field }) => (
                   <Input
                     type="email"
-                    placeholder="Your Email"
+                    placeholder="Enter your email"
                     {...field}
-                    className="border-gray-300 focus:border-gray-400 focus:ring-1 focus:ring-gray-400 h-[51px]"
+                    className="w-full rounded-xl border-gray-300 focus:border-red-500 focus:ring-4 focus:ring-red-100 h-12 px-5 text-base"
                   />
                 )}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
               )}
             </div>
           </div>
 
-          {/* Save Info */}
-          <div className="flex items-center space-x-2">
+          {/* Save Info Checkbox */}
+          <div className="flex items-start gap-4">
             <Controller
               name="saveInfo"
               control={control}
@@ -243,27 +240,26 @@ const CustomerReviewsForm: React.FC<CustomerReviewsFormProps> = ({ productData }
                   id="save-info"
                   checked={field.value}
                   onCheckedChange={(checked) => field.onChange(!!checked)}
-                  className="border-gray-300 w-[22px] h-[22px]"
+                  className="mt-1 w-5 h-5 rounded border-gray-400 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
                 />
               )}
             />
             <label
               htmlFor="save-info"
-              className="text-base text-gray-700 cursor-pointer"
+              className="text-sm sm:text-base text-gray-600 leading-relaxed cursor-pointer"
             >
-              Save my name, email, and website in this browser for the next time
-              I comment.
+              Save my name and email for the next time I leave a review.
             </label>
           </div>
 
-          {/* Submit */}
-          <div>
+          {/* Submit Button */}
+          <div className="pt-4">
             <Button
               type="submit"
-              className="bg-red-600 h-[51px] hover:bg-red-700 text-white text-lg px-10 rounded-md font-medium transition-colors duration-200"
               disabled={createReviewMutation.isPending}
+              className="w-full md:w-auto min-w-[200px] bg-red-600 hover:bg-red-700 text-white font-semibold text-lg px-10 py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {createReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+              {createReviewMutation.isPending ? "Submitting Review..." : "Submit Review"}
             </Button>
           </div>
         </form>

@@ -163,7 +163,7 @@ export default function BestSellingProduct() {
               className="group relative bg-white rounded-2xl sm:rounded-3xl overflow-hidden p-3 sm:p-4 animate-pulse flex flex-col gap-3"
             >
               {/* Image Skeleton */}
-              <Skeleton className="w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-xl sm:rounded-2xl bg-gray-300" />
+              <Skeleton className="w-full h-48 sm:h-56 md:h-64 lg:h-60  bg-gray-300" />
               {/* Badge Skeleton */}
               <Skeleton className="w-16 sm:w-20 h-4 sm:h-5 rounded-full bg-gray-200 absolute top-3 sm:top-4 right-3 sm:right-4" />
               {/* Heart Skeleton */}
@@ -208,7 +208,7 @@ export default function BestSellingProduct() {
                     >
                       {/* 🟢 Product Card */}
                       <div
-                        className={`group relative bg-white rounded-2xl sm:rounded-3xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl ${
+                        className={`group relative bg-white transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl ${
                           isVisible
                             ? "opacity-100 translate-y-0"
                             : "opacity-0 translate-y-4"
@@ -220,7 +220,7 @@ export default function BestSellingProduct() {
                           <img
                             src={product.image}
                             alt={product.name}
-                            className="w-full h-48 sm:h-56 md:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                            className="w-full h-48 sm:h-56 md:h-64 lg:h-60 object-cover group-hover:scale-110 transition-transform duration-700"
                           />
 
                           {/* Sales Badge */}
@@ -267,7 +267,7 @@ export default function BestSellingProduct() {
                           </div>
 
                           {/* Price + Cart */}
-                          <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-2 pt-2">
+                          <div className="flex xs:flex-row items-start xs:items-center justify-between gap-3 xs:gap-2 pt-2">
                             <div className="space-y-0.5 sm:space-y-1">
                               <div className="flex items-center gap-2 sm:gap-3">
                                 <span className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">

@@ -28,7 +28,7 @@ export default function Profilepage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-[90vh] flex items-center justify-center">
       <div className="container mx-auto px-4">
         {/* Main Profile Card */}
         <div className="max-w-2xl mx-auto">

@@ -52,6 +52,7 @@ interface Order {
 const MyOrderPage = () => {
   const { data: session } = useSession();
   const user = session?.user as any;
+  console.log(user)
   const [activeTab, setActiveTab] = useState<"pending" | "paid">("pending");
 
   const {
@@ -64,10 +65,10 @@ const MyOrderPage = () => {
     totalAmount: number;
     orders: Order[];
   }>({
-    queryKey: ["orders", user?.email],
+    queryKey: ["orders", user?.id],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/payment/singleorderbyemailfrontend/${user?.email}`
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/payment/singleorderbyemailfrontend/${user?.id}`
       );
       if (!res.ok) throw new Error("Failed to fetch orders");
       return res.json();

@@ -7,7 +7,6 @@ import ProductDetailsContent from "./ProductDetailsContent";
 import { useParams } from "next/navigation";
 import CustomerReviewsForm from "./CustomerReviewsForm";
 import { useQuery } from "@tanstack/react-query";
-// import MyReviews from './MyReviews'
 import AllReview from "./AllReview";
 import TotalReviews from "./TotalReviews";
 
@@ -58,25 +57,37 @@ function TotalProductDetails() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       <ProductDetailsHeader />
-      <ProductDetailsImage productId={id} productData={product.data} />
-      <ProductDetailsContent productData={product.data} />
-      <div className="flex justify-between items-center gap-10 container mx-auto">
-        <div className="w-[55%]">
-          <CustomerReviewsForm productData={product.data} />
-        </div>
-        <div className="flex-1">
-          <TotalReviews productId={id} />
+      
+      {/* Product Image */}
+      <div className="container mx-auto px-4">
+        <ProductDetailsImage productId={id} productData={product.data} />
+      </div>
+
+      {/* Product Description/Content */}
+      <div className="container mx-auto px-4">
+        <ProductDetailsContent productData={product.data} />
+      </div>
+
+      {/* Reviews Form + Total Reviews Summary */}
+      <div className="container mx-auto lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12">
+          {/* Review Form - Mobile এ full width, Desktop এ left side */}
+          <div className="lg:col-span-7 xl:col-span-8">
+            <CustomerReviewsForm productData={product.data} />
+          </div>
+
+          {/* Total Reviews Summary - Mobile এ full width (form এর নিচে), Desktop এ right side */}
+          <div className="lg:col-span-5 xl:col-span-4 px-4">
+            <TotalReviews productId={id} />
+          </div>
         </div>
       </div>
-      <div className="flex justify-between items-center gap-5 container mx-auto">
-        {/* <div className='w-[30%] border'>
-          <MyReviews productId={Array.isArray(id) ? id[0] : id} />
-        </div> */}
-        <div className="flex-1">
-          <AllReview />
-        </div>
+
+      {/* All Reviews Carousel Section */}
+      <div className="pb-12">
+        <AllReview />
       </div>
     </div>
   );

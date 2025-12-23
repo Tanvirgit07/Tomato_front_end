@@ -134,7 +134,12 @@ export default function CheckoutPage() {
 
   // Checkout Handler
   const handleCheckout = async () => {
-    // STRIPE
+    if (deliveryType === "delivery" && !deliveryInfo) {
+      toast.error("Please enter your delivery address");
+      setHomeDeliveryModalOpen(true);
+      return;
+    }
+
     if (deliveryType === "pickup" || paymentMethod === "stripe") {
       stripeMutation.mutate({
         userId,
@@ -177,103 +182,112 @@ export default function CheckoutPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-24 px-4">
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-20 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
-            <ShoppingBag className="text-yellow-500" size={36} />
-            Checkout
+        <div className="text-center sm:text-left mb-10">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 flex flex-col sm:flex-row items-center gap-4">
+            <ShoppingBag className="w-10 h-10 sm:w-12 sm:h-12 text-yellow-500" />
+            <span>Checkout</span>
           </h1>
-          <p className="text-gray-600 mt-2">Complete your purchase</p>
+          <p className="text-gray-600 mt-3 text-base sm:text-lg">Review your items and complete your purchase</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items - Left Side */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Shopping Cart</h2>
-                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold">
-                  {items.length} {items.length === 1 ? 'item' : 'items'}
-                </span>
+        {/* Main Grid - Stack on mobile, side-by-side on large screens */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cart Items Section */}
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            <div className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="p-6 sm:p-8 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Your Cart Items</h2>
+                  <span className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold">
+                    {items.length} {items.length === 1 ? "item" : "items"}
+                  </span>
+                </div>
               </div>
 
               {isLoading ? (
-                <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+                <div className="p-12 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-yellow-500 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Loading your cart...</p>
                 </div>
               ) : items.length === 0 ? (
-                <div className="text-center py-16">
-                  <ShoppingBag className="mx-auto text-gray-300 mb-4" size={64} />
-                  <p className="text-gray-500 text-lg">Your cart is empty</p>
+                <div className="p-16 text-center">
+                  <ShoppingBag className="mx-auto text-gray-300 mb-6 w-20 h-20" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+                  <p className="text-gray-600">Add some products to proceed with checkout</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="p-6 sm:p-8 space-y-5">
                   {items.map((item: any) => (
                     <div
                       key={item._id}
-                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition-shadow duration-200"
+                      className="grid grid-cols-1 sm:grid-cols-3 gap-5 p-5 bg-gray-50 rounded-2xl hover:shadow-md transition-all duration-300"
                     >
-                      <div className="relative w-24 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden shadow-sm">
+                      {/* Image */}
+                      <div className="relative w-full h-40 sm:h-full">
                         <Image
                           src={item.productId.image}
                           alt={item.productId.name}
                           fill
-                          className="object-cover"
+                          className="object-cover rounded-xl"
                         />
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 truncate">
-                          {item.productId.name}
-                        </h3>
-                        <p className="text-yellow-600 font-bold text-lg mt-1">
-                          ৳{item.productId.discountPrice}
-                        </p>
-                      </div>
+                      {/* Details */}
+                      <div className="sm:col-span-2 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-bold text-gray-900 text-base sm:text-lg line-clamp-2">
+                            {item.productId.name}
+                          </h3>
+                          <p className="text-2xl font-bold text-yellow-600 mt-2">
+                            ৳{item.productId.discountPrice}
+                          </p>
+                        </div>
 
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 rounded-lg hover:bg-yellow-50 hover:border-yellow-300"
-                          onClick={() =>
-                            updateQuantityMutation.mutate({
-                              productId: item.productId._id,
-                              action: "decrement",
-                            })
-                          }
-                        >
-                          <Minus size={14} />
-                        </Button>
+                        {/* Quantity & Delete */}
+                        <div className="flex items-center justify-between mt-4">
+                          <div className="flex items-center gap-3">
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-10 w-10 rounded-xl"
+                              onClick={() =>
+                                updateQuantityMutation.mutate({
+                                  productId: item.productId._id,
+                                  action: "decrement",
+                                })
+                              }
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus size={16} />
+                            </Button>
+                            <span className="text-lg font-bold w-12 text-center">{item.quantity}</span>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-10 w-10 rounded-xl"
+                              onClick={() =>
+                                updateQuantityMutation.mutate({
+                                  productId: item.productId._id,
+                                  action: "increment",
+                                })
+                              }
+                            >
+                              <Plus size={16} />
+                            </Button>
+                          </div>
 
-                        <span className="w-12 text-center font-semibold text-gray-900">
-                          {item.quantity}
-                        </span>
-
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 rounded-lg hover:bg-yellow-50 hover:border-yellow-300"
-                          onClick={() =>
-                            updateQuantityMutation.mutate({
-                              productId: item.productId._id,
-                              action: "increment",
-                            })
-                          }
-                        >
-                          <Plus size={14} />
-                        </Button>
-
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 ml-2 text-red-500 hover:bg-red-50 rounded-lg"
-                          onClick={() => deleteItemMutation.mutate(item.productId._id)}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="text-red-500 hover:bg-red-50 h-10 w-10 rounded-xl"
+                            onClick={() => deleteItemMutation.mutate(item.productId._id)}
+                          >
+                            <Trash2 size={18} />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -282,135 +296,158 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Order Summary - Right Side */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-24">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h3>
+          {/* Order Summary Section */}
+          <div className="order-1 lg:order-2">
+            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 sm:p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-8">Order Summary</h3>
 
               {/* Delivery Options */}
-              <div className="mb-6">
-                <p className="text-sm font-semibold text-gray-700 mb-3">Delivery Method</p>
+              <div className="space-y-4 mb-8">
+                <p className="font-semibold text-gray-800">Choose Delivery Method</p>
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    deliveryType === "pickup"
-                      ? "border-yellow-500 bg-yellow-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}>
+                  <label
+                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                      deliveryType === "pickup"
+                        ? "border-yellow-500 bg-yellow-50 shadow-md"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
                     <input
                       type="radio"
+                      name="delivery"
                       checked={deliveryType === "pickup"}
                       onChange={() => {
                         setDeliveryType("pickup");
                         setPaymentMethod("stripe");
                         setDeliveryInfo(null);
                       }}
-                      className="w-4 h-4 text-yellow-500"
+                      className="w-5 h-5 text-yellow-500"
                     />
-                    <Store className="text-gray-600" size={20} />
-                    <span className="font-medium text-gray-900">Store Pickup</span>
+                    <Store className="w-6 h-6 text-gray-700" />
+                    <div>
+                      <p className="font-semibold text-gray-900">Store Pickup</p>
+                      <p className="text-sm text-gray-600">Free • Collect from store</p>
+                    </div>
                   </label>
 
-                  <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    deliveryType === "delivery"
-                      ? "border-yellow-500 bg-yellow-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}>
+                  <label
+                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                      deliveryType === "delivery"
+                        ? "border-yellow-500 bg-yellow-50 shadow-md"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
                     <input
                       type="radio"
+                      name="delivery"
                       checked={deliveryType === "delivery"}
                       onChange={() => setDeliveryType("delivery")}
-                      className="w-4 h-4 text-yellow-500"
+                      className="w-5 h-5 text-yellow-500"
                     />
-                    <Truck className="text-gray-600" size={20} />
-                    <span className="font-medium text-gray-900">Home Delivery</span>
+                    <Truck className="w-6 h-6 text-gray-700" />
+                    <div>
+                      <p className="font-semibold text-gray-900">Home Delivery</p>
+                      <p className="text-sm text-gray-600">৳100 • Delivered to your door</p>
+                    </div>
                   </label>
                 </div>
               </div>
 
-              {/* Delivery Info Button */}
-              {deliveryType === "delivery" && !deliveryInfo && (
-                <Button
-                  className="w-full mb-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl h-12 font-semibold"
-                  onClick={() => setHomeDeliveryModalOpen(true)}
-                >
-                  <MapPin size={18} className="mr-2" />
-                  Enter Delivery Address
-                </Button>
-              )}
-
-              {/* Delivery Info Display */}
-              {deliveryType === "delivery" && deliveryInfo && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className="text-green-600 mt-1" />
-                      <p className="text-sm font-semibold text-gray-900">Delivery Address</p>
-                    </div>
+              {/* Address Button / Info */}
+              {deliveryType === "delivery" && (
+                <>
+                  {!deliveryInfo ? (
                     <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 text-xs text-blue-600"
+                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-2xl h-14 text-lg shadow-md"
                       onClick={() => setHomeDeliveryModalOpen(true)}
                     >
-                      Edit
+                      <MapPin className="mr-3" size={20} />
+                      Add Delivery Address
                     </Button>
-                  </div>
-                  <p className="text-sm text-gray-700 ml-6">
-                    {deliveryInfo.fullName}<br />
-                    {deliveryInfo.phone}<br />
-                    {deliveryInfo.address}, {deliveryInfo.city}
-                  </p>
-                </div>
+                  ) : (
+                    <div className="mb-6 p-5 bg-green-50 border-2 border-green-200 rounded-2xl">
+                      <div className="flex justify-between items-start mb-3">
+                        <p className="font-semibold text-green-800 flex items-center gap-2">
+                          <MapPin size={18} /> Delivery Address
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setHomeDeliveryModalOpen(true)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                      <div className="text-sm text-gray-700 space-y-1">
+                        <p className="font-medium">{deliveryInfo.fullName}</p>
+                        <p>{deliveryInfo.phone}</p>
+                        <p>{deliveryInfo.address}, {deliveryInfo.city}</p>
+                        <p>{deliveryInfo.postalCode}</p>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
-              {/* Payment Method */}
+              {/* Payment Method - Only for Home Delivery */}
               {deliveryType === "delivery" && deliveryInfo && (
-                <div className="mb-6">
-                  <p className="text-sm font-semibold text-gray-700 mb-3">Payment Method</p>
+                <div className="mb-8">
+                  <p className="font-semibold text-gray-800 mb-4">Payment Method</p>
                   <div className="space-y-3">
-                    <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === "cod"
-                        ? "border-yellow-500 bg-yellow-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}>
+                    <label
+                      className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "cod"
+                          ? "border-yellow-500 bg-yellow-50 shadow-md"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
                       <input
                         type="radio"
                         checked={paymentMethod === "cod"}
                         onChange={() => setPaymentMethod("cod")}
-                        className="w-4 h-4 text-yellow-500"
+                        className="w-5 h-5 text-yellow-500"
                       />
-                      <span className="font-medium text-gray-900">Cash on Delivery</span>
+                      <div>
+                        <p className="font-semibold text-gray-900">Cash on Delivery</p>
+                        <p className="text-sm text-gray-600">Pay when you receive</p>
+                      </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === "stripe"
-                        ? "border-yellow-500 bg-yellow-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}>
+                    <label
+                      className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "stripe"
+                          ? "border-yellow-500 bg-yellow-50 shadow-md"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
                       <input
                         type="radio"
                         checked={paymentMethod === "stripe"}
                         onChange={() => setPaymentMethod("stripe")}
-                        className="w-4 h-4 text-yellow-500"
+                        className="w-5 h-5 text-yellow-500"
                       />
-                      <CreditCard className="text-gray-600" size={20} />
-                      <span className="font-medium text-gray-900">Online Payment</span>
+                      <CreditCard className="w-6 h-6 text-gray-700" />
+                      <div>
+                        <p className="font-semibold text-gray-900">Online Payment</p>
+                        <p className="text-sm text-gray-600">Secure card payment</p>
+                      </div>
                     </label>
                   </div>
                 </div>
               )}
 
-              {/* Price Breakdown */}
-              <div className="border-t border-gray-200 pt-4 space-y-3 mb-6">
-                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal</span>
-                  <span className="font-semibold">৳{subtotal}</span>
+              {/* Price Summary */}
+              <div className="border-t-2 border-dashed border-gray-200 pt-6 space-y-4">
+                <div className="flex justify-between text-lg">
+                  <span className="text-gray-700">Subtotal</span>
+                  <span className="font-bold">৳{subtotal}</span>
                 </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>Shipping</span>
-                  <span className="font-semibold">{shipping === 0 ? 'Free' : `৳${shipping}`}</span>
+                <div className="flex justify-between text-lg">
+                  <span className="text-gray-700">Shipping</span>
+                  <span className="font-bold">{shipping === 0 ? "Free" : `৳${shipping}`}</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t border-gray-200">
+                <div className="flex justify-between text-2xl font-bold pt-4 border-t border-gray-300">
                   <span>Total</span>
                   <span className="text-yellow-600">৳{total}</span>
                 </div>
@@ -418,23 +455,24 @@ export default function CheckoutPage() {
 
               {/* Checkout Button */}
               <Button
-                className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-bold rounded-xl h-14 text-lg shadow-lg hover:shadow-xl transition-all"
                 onClick={handleCheckout}
-                disabled={items.length === 0}
+                disabled={items.length === 0 || updateQuantityMutation.isPending || stripeMutation.isPending}
+                className="w-full mt-8 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold text-xl h-16 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 {deliveryType === "delivery" && paymentMethod === "cod"
-                  ? "Place Order (COD)"
+                  ? "Place Order (Cash on Delivery)"
                   : "Proceed to Payment"}
               </Button>
 
-              <p className="text-xs text-gray-500 text-center mt-4">
-                Your payment information is secure and encrypted
+              <p className="text-center text-xs text-gray-500 mt-6">
+                🔒 Secure checkout • Your information is encrypted and protected
               </p>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Address Modal */}
       <AddressFormModal
         open={homeDeliveryModalOpen}
         onOpenChange={setHomeDeliveryModalOpen}
