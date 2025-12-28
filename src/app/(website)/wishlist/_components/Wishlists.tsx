@@ -13,7 +13,7 @@ function Wishlists() {
   const userId = user?.id;
   const queryClient = useQueryClient();
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [addedToCart, setAddedToCart] = useState<Record<string, boolean>>({}); // ✅ Track added products
+  const [addedToCart, setAddedToCart] = useState<Record<string, boolean>>({});
 
   // Get wishlist
   const {
@@ -81,7 +81,7 @@ function Wishlists() {
       return res.json();
     },
     onSuccess: (_data, variables) => {
-      setAddedToCart((prev) => ({ ...prev, [variables.productId]: true })); // ✅ Mark product as added
+      setAddedToCart((prev) => ({ ...prev, [variables.productId]: true }));
       toast.success("Added to cart!");
     },
     onError: () => {
@@ -190,33 +190,33 @@ function Wishlists() {
 
   // Main UI
   return (
-    <div className="min-h-screen bg-white py-20">
+    <div className="min-h-screen bg-white py-8 md:py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 md:mb-8">
           {/* Title with Heart Icon */}
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Heart className="h-6 w-6 text-red-500" />
-            <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-wide">
+            <Heart className="h-5 w-5 md:h-6 md:w-6 text-red-500" />
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 uppercase tracking-wide">
               Wishlist
             </h1>
           </div>
 
           {/* Subtitle */}
-          <p className="text-sm text-gray-500 max-w-md mx-auto mb-3">
+          <p className="text-xs md:text-sm text-gray-500 max-w-md mx-auto mb-3 px-4">
             Save your favorite items here and revisit them anytime. Add to cart
             when you&apos;re ready to checkout.
           </p>
         </div>
 
-        {/* Wishlist Table */}
+        {/* Wishlist Content */}
         {wishlist.length === 0 ? (
-          <div className="text-center py-16">
-            <Heart className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="text-center py-12 md:py-16">
+            <Heart className="mx-auto h-12 w-12 md:h-16 md:w-16 text-gray-300 mb-4" />
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
               Your wishlist is empty
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-gray-600 mb-6 md:mb-8">
               Save items you love to buy them later.
             </p>
             <button
@@ -227,36 +227,190 @@ function Wishlists() {
             </button>
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-            {/* Table Header */}
-            <div className="bg-gray-50 border-b border-gray-200">
-              <div className="grid grid-cols-12 gap-4 px-6 py-4">
-                <div className="col-span-1">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-gray-600 rounded border-gray-300"
-                  />
+          <>
+            {/* Desktop Table View (hidden on mobile) */}
+            <div className="hidden lg:block bg-white border border-gray-200 rounded-lg overflow-hidden">
+              {/* Table Header */}
+              <div className="bg-gray-50 border-b border-gray-200">
+                <div className="grid grid-cols-12 gap-4 px-6 py-4">
+                  <div className="col-span-1">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-gray-600 rounded border-gray-300"
+                    />
+                  </div>
+                  <div className="col-span-3 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                    PRODUCT
+                  </div>
+                  <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                    QUANTITY
+                  </div>
+                  <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                    PRICE
+                  </div>
+                  <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                    STOCK STATUS
+                  </div>
+                  <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
+                    ACTION
+                  </div>
                 </div>
-                <div className="col-span-3 text-sm font-medium text-gray-700 uppercase tracking-wide">
-                  PRODUCT
-                </div>
-                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
-                  QUANTITY
-                </div>
-                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
-                  PRICE
-                </div>
-                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
-                  STOCK STATUS
-                </div>
-                <div className="col-span-2 text-sm font-medium text-gray-700 uppercase tracking-wide">
-                  ACTION
-                </div>
+              </div>
+
+              {/* Table Body */}
+              <div className="divide-y divide-gray-200">
+                {wishlist.map((item: any) => {
+                  const product = item.productId;
+                  const discount = calculateDiscount(
+                    product.price,
+                    product.discountPrice
+                  );
+                  const hasDiscount = discount > 0;
+                  const quantity = getQuantity(product._id);
+
+                  return (
+                    <div
+                      key={item._id}
+                      className="grid grid-cols-12 gap-4 px-6 py-6 hover:bg-gray-50"
+                    >
+                      {/* Checkbox */}
+                      <div className="col-span-1 flex items-center">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-gray-600 rounded border-gray-300"
+                        />
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="col-span-3 flex items-center gap-4">
+                        <div className="relative w-16 h-16 flex-shrink-0">
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            className="object-cover rounded"
+                          />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900 mb-1">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-gray-500">
+                            SKU: {product._id.slice(-8)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Quantity */}
+                      <div className="col-span-2 flex items-center">
+                        <div className="flex items-center border border-gray-300 rounded">
+                          <button
+                            onClick={() =>
+                              updateQuantity(
+                                product._id,
+                                quantity - 1,
+                                product.stock
+                              )
+                            }
+                            className="p-2 hover:bg-gray-100 text-gray-600"
+                            disabled={quantity <= 1}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="px-4 py-2 border-x border-gray-300 text-center min-w-[60px]">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(
+                                product._id,
+                                quantity + 1,
+                                product.stock
+                              )
+                            }
+                            className="p-2 hover:bg-gray-100 text-gray-600"
+                            disabled={quantity >= product.stock}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="col-span-2 flex items-center">
+                        <div>
+                          {hasDiscount && (
+                            <div className="text-sm text-gray-500 line-through">
+                              ${product.price.toFixed(2)}
+                            </div>
+                          )}
+                          <div className="text-lg font-medium text-red-500">
+                            $
+                            {hasDiscount
+                              ? product.discountPrice.toFixed(2)
+                              : product.price.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Stock Status */}
+                      <div className="col-span-2 flex items-center">
+                        {product.stock > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <span className="text-sm text-gray-600">
+                              {product.stock} in stock
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                            <span className="text-sm text-red-600">
+                              Out of stock
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="col-span-2 flex items-center gap-2">
+                        <button
+                          onClick={() => handleAddToCart(product._id)}
+                          disabled={
+                            product.stock === 0 ||
+                            addToCartMutation.isPending ||
+                            addedToCart[product._id]
+                          }
+                          className="bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                        >
+                          {addedToCart[product._id] ? "Added" : "Add"}
+                        </button>
+                        <button
+                          onClick={() =>
+                            (window.location.href = `/products/${product._id}`)
+                          }
+                          className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                          title="View product"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFromWishlist(product._id)}
+                          disabled={removeFromWishlistMutation.isPending}
+                          className="p-2 text-gray-400 hover:text-red-600 border border-gray-300 rounded"
+                          title="Remove from wishlist"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-gray-200">
+            {/* Mobile Card View (hidden on desktop) */}
+            <div className="lg:hidden space-y-4">
               {wishlist.map((item: any) => {
                 const product = item.productId;
                 const discount = calculateDiscount(
@@ -269,19 +423,21 @@ function Wishlists() {
                 return (
                   <div
                     key={item._id}
-                    className="grid grid-cols-12 gap-4 px-6 py-6 hover:bg-gray-50"
+                    className="bg-white border border-gray-200 rounded-lg p-4 relative"
                   >
-                    {/* Checkbox */}
-                    <div className="col-span-1 flex items-center">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 text-gray-600 rounded border-gray-300"
-                      />
-                    </div>
+                    {/* Remove Button (Top Right) */}
+                    <button
+                      onClick={() => handleRemoveFromWishlist(product._id)}
+                      disabled={removeFromWishlistMutation.isPending}
+                      className="absolute top-3 right-3 p-2 text-gray-400 hover:text-red-600 bg-white border border-gray-300 rounded"
+                      title="Remove from wishlist"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
 
-                    {/* Product Info */}
-                    <div className="col-span-3 flex items-center gap-4">
-                      <div className="relative w-16 h-16 flex-shrink-0">
+                    {/* Product Image and Info */}
+                    <div className="flex gap-4 mb-4">
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0">
                         <Image
                           src={product.image}
                           alt={product.name}
@@ -289,18 +445,52 @@ function Wishlists() {
                           className="object-cover rounded"
                         />
                       </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900 mb-1">
+                      <div className="flex-1 pr-8">
+                        <h3 className="font-medium text-gray-900 mb-1 text-sm sm:text-base">
                           {product.name}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs text-gray-500 mb-2">
                           SKU: {product._id.slice(-8)}
                         </p>
+                        {/* Stock Status */}
+                        {product.stock > 0 ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <span className="text-xs text-gray-600">
+                              {product.stock} in stock
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                            <span className="text-xs text-red-600">
+                              Out of stock
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    {/* Quantity */}
-                    <div className="col-span-2 flex items-center">
+                    {/* Price */}
+                    <div className="mb-4">
+                      {hasDiscount && (
+                        <div className="text-sm text-gray-500 line-through">
+                          ${product.price.toFixed(2)}
+                        </div>
+                      )}
+                      <div className="text-xl font-medium text-red-500">
+                        $
+                        {hasDiscount
+                          ? product.discountPrice.toFixed(2)
+                          : product.price.toFixed(2)}
+                      </div>
+                    </div>
+
+                    {/* Quantity Selector */}
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-medium text-gray-700">
+                        Quantity:
+                      </span>
                       <div className="flex items-center border border-gray-300 rounded">
                         <button
                           onClick={() =>
@@ -315,7 +505,7 @@ function Wishlists() {
                         >
                           <Minus className="h-3 w-3" />
                         </button>
-                        <span className="px-4 py-2 border-x border-gray-300 text-center min-w-[60px]">
+                        <span className="px-4 py-2 border-x border-gray-300 text-center min-w-[50px]">
                           {quantity}
                         </span>
                         <button
@@ -334,78 +524,34 @@ function Wishlists() {
                       </div>
                     </div>
 
-                    {/* Price */}
-                    <div className="col-span-2 flex items-center">
-                      <div>
-                        {hasDiscount && (
-                          <div className="text-sm text-gray-500 line-through">
-                            ${product.price.toFixed(2)}
-                          </div>
-                        )}
-                        <div className="text-lg font-medium text-red-500">
-                          $
-                          {hasDiscount
-                            ? product.discountPrice.toFixed(2)
-                            : product.price.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Stock Status */}
-                    <div className="col-span-2 flex items-center">
-                      {product.stock > 0 ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <span className="text-sm text-gray-600">
-                            {product.stock} in stock
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                          <span className="text-sm text-red-600">
-                            Out of stock
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="col-span-2 flex items-center gap-2">
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
                       <button
                         onClick={() => handleAddToCart(product._id)}
                         disabled={
                           product.stock === 0 ||
                           addToCartMutation.isPending ||
-                          addedToCart[product._id] // ✅ stays disabled after first add
+                          addedToCart[product._id]
                         }
-                        className="bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                        className="flex-1 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 text-white px-4 py-2.5 rounded text-sm font-medium transition-colors"
                       >
-                        {addedToCart[product._id] ? "Added" : "Add"}
+                        {addedToCart[product._id] ? "Added to Cart" : "Add to Cart"}
                       </button>
                       <button
                         onClick={() =>
                           (window.location.href = `/products/${product._id}`)
                         }
-                        className="p-2 text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
+                        className="p-2.5 text-gray-400 hover:text-gray-600 border border-gray-300 rounded"
                         title="View product"
                       >
                         <Eye className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleRemoveFromWishlist(product._id)}
-                        disabled={removeFromWishlistMutation.isPending}
-                        className="p-2 text-gray-400 hover:text-red-600 border border-gray-300 rounded"
-                        title="Remove from wishlist"
-                      >
-                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
