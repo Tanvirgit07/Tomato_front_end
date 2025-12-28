@@ -4,7 +4,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Lock, Camera, Edit3, Mail, ChevronRight, Truck } from "lucide-react";
+import {
+  User,
+  Lock,
+  Camera,
+  Edit3,
+  Mail,
+  ChevronRight,
+  Truck,
+} from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { LogoutModal } from "@/components/modal/Logout";
@@ -102,55 +110,51 @@ export default function Profilepage() {
                   {/* Register Button */}
                   <div className="flex-1">
                     <Link href="/account/personalInfo">
-                    <Button
-                      onClick={handlePersonalInfo}
-                      className="w-full h-16 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
-                      size="lg"
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 bg-white/20 rounded-lg">
-                            <User className="h-6 w-6" />
+                      <Button
+                        onClick={handlePersonalInfo}
+                        className="w-full h-16 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        size="lg"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white/20 rounded-lg">
+                              <User className="h-6 w-6" />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-semibold text-lg">
+                                Personal Information
+                              </p>
+                            </div>
                           </div>
-                          <div className="text-left">
-                            <p className="font-semibold text-lg">
-                              Personal Information
-                            </p>
-                          </div>
+                          <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
-                        <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
-                      </div>
-                    </Button>
-                  </Link>
+                      </Button>
+                    </Link>
                   </div>
 
                   {/* Logout Button */}
                   <div className="flex-1">
                     <Link href="/orders">
-                    <Button
-                      onClick={handlePersonalInfo}
-                      className="w-full h-16 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
-                      size="lg"
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 bg-white/20 rounded-lg">
-                            <Truck className="h-6 w-6" />
+                      <Button
+                        onClick={handlePersonalInfo}
+                        className="w-full h-16 cursor-pointer bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                        size="lg"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white/20 rounded-lg">
+                              <Truck className="h-6 w-6" />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-semibold text-lg">My Orders</p>
+                            </div>
                           </div>
-                          <div className="text-left">
-                            <p className="font-semibold text-lg">
-                              My Orders
-                            </p>
-                          </div>
+                          <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
-                        <ChevronRight className="h-6 w-6 transform group-hover:translate-x-1 transition-transform duration-300" />
-                      </div>
-                    </Button>
-                  </Link>
+                      </Button>
+                    </Link>
                   </div>
                 </div>
-
-
 
                 <div>
                   <Link href="/account/changepasword">
@@ -201,7 +205,7 @@ export default function Profilepage() {
                 <div className="flex gap-4">
                   {/* Register Button */}
                   <div className="flex-1">
-                    <Link href="/register">
+                    <Link href="/signup">
                       <Button
                         className="w-full h-16 cursor-pointer bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                         size="lg"
@@ -241,7 +245,6 @@ export default function Profilepage() {
                       </div>
                     </Button>
                   </div>
-
                 </div>
               </div>
             </CardContent>
@@ -249,10 +252,7 @@ export default function Profilepage() {
         </div>
       </div>
 
-         <LogoutModal
-        open={open}
-        onClose={() => setOpen(false)}
-      />
+      <LogoutModal open={open} onClose={() => setOpen(false)} />
     </div>
   );
 }
