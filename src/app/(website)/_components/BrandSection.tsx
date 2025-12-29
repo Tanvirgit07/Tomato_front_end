@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 
 interface StarRatingProps {
   rating: number;
@@ -36,6 +37,7 @@ interface Seller {
 interface BrandCardProps {
   brand: Seller;
   index: number;
+  brandId : string;
 }
 
 const BrandSection = () => {
@@ -156,7 +158,8 @@ const BrandSection = () => {
     );
   };
 
-  const BrandCard: React.FC<BrandCardProps> = ({ brand, index }) => (
+  const BrandCard: React.FC<BrandCardProps> = ({ brand, index,brandId }) => (
+    <Link href={`/seller/${brandId}`}>
     <Card
       className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer border-0 shadow-lg bg-gradient-to-br from-white to-gray-50"
       style={{ animationDelay: `${index * 100}ms` }}
@@ -244,6 +247,7 @@ const BrandSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg"></div>
       </CardContent>
     </Card>
+    </Link>
   );
 
   if (isLoading) return <p className="text-center">Loading sellers...</p>;
@@ -315,7 +319,7 @@ const BrandSection = () => {
                 className="animate-fade-in"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <BrandCard brand={brand} index={index} />
+                <BrandCard brand={brand} index={index} brandId={brand._id} />
               </div>
             ))}
           </div>
@@ -348,6 +352,7 @@ const BrandSection = () => {
                           <BrandCard
                             key={brand._id}
                             brand={brand}
+                            brandId = {brand._id}
                             index={index}
                           />
                         ))}
